@@ -3,7 +3,6 @@ target/
 *.iml
 .DS_Store
 
-# Local Paper dev server — generated at runtime; only scripts are tracked
 run/*
 !run/start.sh
 !run/sync-plugin.sh

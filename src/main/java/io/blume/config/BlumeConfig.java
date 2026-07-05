@@ -20,7 +20,7 @@ public final class BlumeConfig {
         resourcePackEnabled = cfg.getBoolean("resource-pack.enabled", true);
         resourcePackUrl = nullToEmpty(cfg.getString("resource-pack.url"));
         resourcePackSha1 = nullToEmpty(cfg.getString("resource-pack.sha1"));
-        resourcePackRequired = cfg.getBoolean("resource-pack.required", false);
+        resourcePackRequired = cfg.getBoolean("resource-pack.required", true);
         resourcePackPrompt = cfg.getString("resource-pack.prompt", DEFAULT_PROMPT);
 
         if (resourcePackEnabled && resourcePackUrl.isBlank()) {

@@ -14,6 +14,9 @@
 [ ] pollination (works like bonemeal)
 [ ] reward treating animals ethicly (large pasture, water accsessibilty, etc), ex: more yeald
 [ ] grass blocks have a chance to grow short grass above them naturally - And short grass is able to grow into tall grass.
+[ ] make carrot seed texture
+[ ] make potato seed texture
+[ ] make mixed seed texture
 
 # enchants
 [ ] auto smelt (auto smelts ores you mine)
@@ -23,11 +26,10 @@
 [ ] sickle i-iii (harvests crops in a radius)
 
 # admin
-[ ] all commands are displayed in chat (prevents cheating)
-[ ] graylist: if graylisted you can not move entities, break blocks, cause explosions, etc
-    [ ] '/vouch <player>' requires perm blume.vouch, but un-graylists a player (keeps a log of who un-graylisted who for accountability)
+[x] all commands are displayed in chat (prevents cheating)
+[x] graylist: if graylisted you can not move entities, break blocks, cause explosions, etc
+    [x] '/vouch <player>' requires perm blume.vouch, but un-graylists a player (keeps a log of who un-graylisted who for accountability)
 
 # docs
-[ ] write README.md
 [ ] make website 
 [x] make icon
