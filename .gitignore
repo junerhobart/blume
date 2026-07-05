@@ -1,0 +1,13 @@
+target/
+*.jar
+*.class
+
+.idea/
+*.iml
+.vscode/
+*.swp
+*~
+
+.cursor/
+
+.DS_Store

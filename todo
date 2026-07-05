@@ -1,0 +1,33 @@
+# QOL
+[ ] 'double doors' from vane
+[ ] desire paths, vanilla only blocks, ex: grass -> traple grass/flowers -> 75% dirt/20% corse/5% gravel -> dirt path
+[ ] player dropped items from death dont despawn for 4 hours
+[ ] no more too expensive on anvil
+[ ] right click to harvest + replant seed
+[ ] speed boost on grass paths
+[ ]'creeper protection with style' from vane
+
+# ecology idea credit: https://www.curseforge.com/minecraft/mc-mods/ecological
+[ ] grass now drops mixed seeds (mixed seeds most often wont grow into anything besides 95% grass, however, they have a chance to grow into a random regular crop)
+[ ] you can find crops in the world in pathes like grass directly on the ground no tilled soil required (you still need to till soil to plant seeds)
+[ ] carrot seeds & potato seeds (you can still plant a potato or a carrot)
+[ ] pollination (works like bonemeal)
+[ ] reward treating animals ethicly (large pasture, water accsessibilty, etc), ex: more yeald
+[ ] grass blocks have a chance to grow short grass above them naturally - And short grass is able to grow into tall grass.
+
+# enchants
+[ ] auto smelt (auto smelts ores you mine)
+[ ] unbreakable (loot only, super duper rare)
+[ ] veinminer
+[ ] timber (only breaks non player placed logs, replants sapling(s))
+[ ] sickle i-iii (harvests crops in a radius)
+
+# admin
+[ ] all commands are displayed in chat (prevents cheating)
+[ ] graylist: if graylisted you can not move entities, break blocks, cause explosions, etc
+    [ ] '/vouch <player>' requires perm blume.vouch, but un-graylists a player (keeps a log of who un-graylisted who for accountability)
+
+# docs
+[ ] write README.md
+[ ] make website 
+[x] make icon

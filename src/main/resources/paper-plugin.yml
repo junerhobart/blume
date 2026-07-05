@@ -1,0 +1,15 @@
+name: Blume
+version: '${project.version}'
+main: io.blume.BlumePlugin
+api-version: '${minecraft.version}'
+description: QoL, ecology, enchants, and admin tools.
+authors:
+  - June
+
+permissions:
+  blume.admin:
+    description: Blume admin commands
+    default: op
+  blume.vouch:
+    description: Un-graylist players
+    default: op
