@@ -4,3 +4,39 @@ resource-pack:
   sha1: "68133ab95542a91968f1c23525470f769ab18633"
   required: false
   prompt: "<green>Blume</green> uses a resource pack for custom items. Please accept."
+
+qol:
+  double-doors:
+    enabled: true
+  creeper-rebuild:
+    enabled: true
+    rebuild-delay-ms: 2000
+    rebuild-delay-falloff: 0.175
+    rebuild-min-delay-ms: 50
+    rebuild-wither: true
+  desire-paths:
+    enabled: true
+    walks-to-trample: 8
+    walks-to-worn: 16
+    walks-to-path: 24
+    worn-weights:
+      dirt: 75
+      coarse_dirt: 20
+      gravel: 5
+  death-drops:
+    enabled: true
+    lifetime-minutes: 240
+  anvil:
+    enabled: true
+    max-repair-cost: 2147483647
+  harvest-replant:
+    enabled: true
+    require-empty-hand: false
+  path-speed:
+    enabled: true
+    speed-1-blocks:
+      - DIRT
+      - COARSE_DIRT
+      - GRAVEL
+    speed-2-blocks:
+      - DIRT_PATH

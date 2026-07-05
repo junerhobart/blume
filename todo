@@ -1,11 +1,11 @@
 # QOL
-[ ] 'double doors' from vane
-[ ] desire paths, vanilla only blocks, ex: grass -> traple grass/flowers -> 75% dirt/20% corse/5% gravel -> dirt path
-[ ] player dropped items from death dont despawn for 4 hours
-[ ] no more too expensive on anvil
-[ ] right click to harvest + replant seed
-[ ] speed boost on grass paths
-[ ]'creeper protection with style' from vane
+[x] 'double doors' from vane
+[x] desire paths, vanilla only blocks, ex: grass -> traple grass/flowers -> 75% dirt/20% corse/5% gravel -> dirt path
+[x] player dropped items from death dont despawn for 4 hours
+[x] no more too expensive on anvil
+[x] right click to harvest + replant seed (still drops seeds just - 1)
+[x] speed boosts on paths, speed I for dirt/corse/gravel, speed II for dirt path
+[x]'creeper protection with style' from vane
 
 # ecology idea credit: https://www.curseforge.com/minecraft/mc-mods/ecological
 [ ] grass now drops mixed seeds (mixed seeds most often wont grow into anything besides 95% grass, however, they have a chance to grow into a random regular crop)
