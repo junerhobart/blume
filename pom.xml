@@ -11,6 +11,14 @@
     <version>0.2</version>
     <packaging>jar</packaging>
 
+    <licenses>
+        <license>
+            <name>GNU General Public License v3.0</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <properties>
         <java.version>21</java.version>
         <minecraft.version>1.21.8</minecraft.version>
