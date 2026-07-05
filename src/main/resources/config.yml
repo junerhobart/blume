@@ -1,7 +1,7 @@
 resource-pack:
   enabled: true
   url: "https://junerhobart.github.io/blume/blume-pack.zip"
-  sha1: "68133ab95542a91968f1c23525470f769ab18633"
+  sha1: "bf9d3bbaf308f1c43e12d328ee5f6d41fddc155d"
   required: true
   prompt: "<green>Blume</green> uses a resource pack for custom items. Please accept."
 
@@ -61,3 +61,20 @@ qol:
       - GRAVEL
     speed-2-blocks:
       - DIRT_PATH
+
+enchants:
+  enabled: true
+  auto-smelt:
+    enabled: true
+  veinminer:
+    enabled: true
+    max-blocks: -1
+  timber:
+    enabled: true
+    max-blocks: -1
+    replant-saplings: true
+  sickle:
+    enabled: true
+    radius-by-level: [1, 2, 3]
+  unbreakable:
+    enabled: true

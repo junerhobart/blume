@@ -14,16 +14,16 @@
 [ ] pollination (works like bonemeal)
 [ ] reward treating animals ethicly (large pasture, water accsessibilty, etc), ex: more yeald
 [ ] grass blocks have a chance to grow short grass above them naturally - And short grass is able to grow into tall grass.
-[ ] make carrot seed texture
-[ ] make potato seed texture
-[ ] make mixed seed texture
+[x] make carrot seed texture
+[x] make potato seed texture
+[x] make mixed seed texture
 
 # enchants
-[ ] auto smelt (auto smelts ores you mine)
-[ ] unbreakable (loot only, super duper rare)
-[ ] veinminer
-[ ] timber (only breaks non player placed logs, replants sapling(s))
-[ ] sickle i-iii (harvests crops in a radius)
+[x] auto smelt (auto smelts ores you mine)
+[x] unbreakable (loot only, super duper rare)
+[x] veinminer
+[x] timber (only breaks non player placed logs, replants sapling(s))
+[x] sickle i-iii (harvests crops in a radius)
 
 # admin
 [x] all commands are displayed in chat (prevents cheating)

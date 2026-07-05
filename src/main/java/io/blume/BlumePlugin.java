@@ -3,6 +3,8 @@ package io.blume;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.blume.admin.AdminConfig;
 import io.blume.admin.AdminModule;
+import io.blume.enchants.EnchantsConfig;
+import io.blume.enchants.EnchantsModule;
 import io.blume.command.BlumeCommand;
 import io.blume.config.BlumeConfig;
 import io.blume.listener.PlayerJoinListener;
@@ -26,6 +28,8 @@ public final class BlumePlugin extends JavaPlugin {
     private ResourcePackService resourcePackService;
     private QolModule qolModule;
     private AdminModule adminModule;
+    private EnchantsConfig enchantsConfig;
+    private EnchantsModule enchantsModule;
 
     @Override
     public void onEnable() {
@@ -33,6 +37,7 @@ public final class BlumePlugin extends JavaPlugin {
         blumeConfig = new BlumeConfig(getConfig(), getLogger());
         qolConfig = new QolConfig(getConfig());
         adminConfig = new AdminConfig(getConfig());
+        enchantsConfig = new EnchantsConfig(getConfig());
         resourcePackService = new ResourcePackService(this, blumeConfig);
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, resourcePackService), this);
@@ -42,6 +47,9 @@ public final class BlumePlugin extends JavaPlugin {
 
         adminModule = new AdminModule(this, adminConfig);
         adminModule.enable();
+
+        enchantsModule = new EnchantsModule(this, enchantsConfig);
+        enchantsModule.enable();
 
         BlumeCommand cmd = new BlumeCommand(this);
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
@@ -86,6 +94,10 @@ public final class BlumePlugin extends JavaPlugin {
             adminModule.disable();
             adminModule = null;
         }
+        if (enchantsModule != null) {
+            enchantsModule.disable();
+            enchantsModule = null;
+        }
         if (qolModule != null) {
             qolModule.disable();
             qolModule = null;
@@ -98,6 +110,7 @@ public final class BlumePlugin extends JavaPlugin {
         blumeConfig = new BlumeConfig(cfg, getLogger());
         qolConfig = new QolConfig(cfg);
         adminConfig = new AdminConfig(cfg);
+        enchantsConfig = new EnchantsConfig(cfg);
         resourcePackService.reload(blumeConfig);
 
         if (qolModule != null) {
@@ -105,6 +118,9 @@ public final class BlumePlugin extends JavaPlugin {
         }
         if (adminModule != null) {
             adminModule.reload(adminConfig);
+        }
+        if (enchantsModule != null) {
+            enchantsModule.reload(enchantsConfig);
         }
 
         for (Player player : getServer().getOnlinePlayers()) {
