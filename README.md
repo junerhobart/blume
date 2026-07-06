@@ -1,4 +1,4 @@
-<p style="text-align: center;"><img width="auto" src="docs/assets/banner.png" alt="Blume banner"></p>
+<p style="text-align: center;"><img width="auto" src="https://github.com/junerhobart/blume/raw/main/docs/assets/banner.png" alt="Blume banner"></p>
 
 # About Blume
 

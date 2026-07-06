@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Version from tag
+        id: version
+        run: echo "value=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Validate pom.xml version matches tag
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          POM_VERSION=$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
+          if [ "$POM_VERSION" != "$VERSION" ]; then
+            echo "pom.xml version ($POM_VERSION) does not match tag ($VERSION)"
+            exit 1
+          fi
+
+      - name: Build
+        run: mvn -B package
+
+      - name: Changelog from commit
+        run: git log -1 --format=%B "$GITHUB_SHA" > changelog.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          body_path: changelog.txt
+          generate_release_notes: false
+          files: target/Blume-${{ steps.version.outputs.value }}.jar
+
+      - name: Publish to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          JSON=$(jq -n \
+            --arg name "Blume ${VERSION}" \
+            --arg version_number "$VERSION" \
+            --arg changelog "$(cat changelog.txt)" \
+            --arg project_id "$MODRINTH_PROJECT_ID" \
+            --argjson game_versions '["1.21.8"]' \
+            --argjson loaders '["paper"]' \
+            '{
+              name: $name,
+              version_number: $version_number,
+              changelog: $changelog,
+              game_versions: $game_versions,
+              version_type: "release",
+              loaders: $loaders,
+              project_id: $project_id,
+              file_parts: ["jar"],
+              primary_file: "jar",
+              environment: "server_only"
+            }')
+
+          curl -fsSL -X POST "https://api.modrinth.com/v2/version" \
+            -H "Authorization: ${MODRINTH_TOKEN}" \
+            -F "data=${JSON};type=application/json" \
+            -F "jar=@target/Blume-${VERSION}.jar"
