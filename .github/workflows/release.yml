@@ -39,7 +39,13 @@ jobs:
         run: mvn -B package
 
       - name: Changelog since last tag
-        run: git log --format='- %s' > changelog.txt
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)
+          if [ -n "$PREV_TAG" ]; then
+            git log "${PREV_TAG}..HEAD" --format='- %s' > changelog.txt
+          else
+            git log --format='- %s' > changelog.txt
+          fi
 
       - uses: softprops/action-gh-release@v2
         with:
