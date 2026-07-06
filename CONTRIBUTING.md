@@ -1,8 +1,6 @@
-# Contributing
+# Building
 
-## Building
-
-### Plugin
+## Plugin
 
 ```bash
 git clone https://github.com/junerhobart/blume.git
@@ -12,9 +10,9 @@ mvn package
 
 The plugin jar is written to `target/Blume-<version>.jar`.
 
-A build also regenerates `docs/blume-pack.zip` from `resourcepack/`.
+A build also regenerates `docs/blume-pack.zip` from `resourcepack/java/`, `docs/blume-bedrock-pack.zip` from `resourcepack/bedrock/` (seed PNGs copied from the Java pack at build time), and `docs/blume-geyser-mappings.json` from `resourcepack/bedrock/geyser_items.json`.
 
-### Website
+## Website
 
 ```bash
 cd docs/source
@@ -24,21 +22,21 @@ npm install
 cd .. && python3 -m http.server 8765
 ```
 
-## Local testing
+# Local testing
 
 1. Run `'/Users/junehobart/Projects/blume/run/scripts/start.sh'`
 2. Join `localhost` and test.
 
 Note: you can also run `'/Users/junehobart/Projects/blume/run/scripts/purge.sh'` to remove server data (keeps important bits), `'/Users/junehobart/Projects/blume/run/scripts/sync-plugin.sh'`, and then in the server `/blume reload`.
 
-## Code guidelines
+# Code guidelines
 
 - Keep names clear and diffs small.
 - Avoid unrelated refactors in the same PR.
 - Do not commit generated files unless the project already tracks them (for example `docs/blume-pack.zip`).
 - 'AI assisted' or 'vibecoded' commits are permitted, but I better not see a +200k line commit.
 
-## License
+# License
 
 By contributing, you agree that your contributions will be licensed under the same license as the project ([GPL-3.0](./LICENSE)).
 

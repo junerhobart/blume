@@ -8,7 +8,7 @@
 
     <groupId>io.blume</groupId>
     <artifactId>Blume</artifactId>
-    <version>0.3.1</version>
+    <version>0.4</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -33,6 +33,10 @@
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
+        <repository>
+            <id>opencollab</id>
+            <url>https://repo.opencollab.dev/main/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -46,6 +50,12 @@
             <groupId>net.luckperms</groupId>
             <artifactId>api</artifactId>
             <version>5.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.geysermc.geyser</groupId>
+            <artifactId>api</artifactId>
+            <version>2.9.6-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -110,9 +120,15 @@
                                 <property name="pack.zip" location="${project.basedir}/docs/blume-pack.zip"/>
                                 <property name="pack.sha1.file"
                                           location="${project.build.directory}/pack-sha1.properties"/>
+                                <property name="bedrock.stage"
+                                          location="${project.build.directory}/bedrock-pack-stage"/>
+                                <property name="bedrock.zip"
+                                          location="${project.basedir}/docs/blume-bedrock-pack.zip"/>
+                                <property name="geyser.mappings"
+                                          location="${project.basedir}/docs/blume-geyser-mappings.json"/>
                                 <mkdir dir="${project.basedir}/docs"/>
                                 <zip destfile="${pack.zip}"
-                                     basedir="${project.basedir}/resourcepack"/>
+                                     basedir="${project.basedir}/resourcepack/java"/>
                                 <checksum file="${pack.zip}"
                                           algorithm="SHA-1"
                                           property="pack.sha1"/>
@@ -120,6 +136,23 @@
                                       message="pack.sha1=${pack.sha1}"/>
                                 <echo message="Resource pack: docs/blume-pack.zip"/>
                                 <echo message="SHA-1: ${pack.sha1}"/>
+                                <delete dir="${bedrock.stage}" quiet="true"/>
+                                <mkdir dir="${bedrock.stage}/textures/items"/>
+                                <copy todir="${bedrock.stage}">
+                                    <fileset dir="${project.basedir}/resourcepack/bedrock">
+                                        <exclude name="geyser_items.json"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="${bedrock.stage}/textures/items">
+                                    <fileset dir="${project.basedir}/resourcepack/java/assets/blume/textures/item">
+                                        <include name="*.png"/>
+                                    </fileset>
+                                </copy>
+                                <zip destfile="${bedrock.zip}" basedir="${bedrock.stage}"/>
+                                <copy file="${project.basedir}/resourcepack/bedrock/geyser_items.json"
+                                      tofile="${geyser.mappings}"/>
+                                <echo message="Bedrock pack: docs/blume-bedrock-pack.zip"/>
+                                <echo message="Geyser mappings: docs/blume-geyser-mappings.json"/>
                             </target>
                         </configuration>
                     </execution>

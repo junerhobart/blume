@@ -15,6 +15,8 @@ public final class BlumeConfig {
     private final String resourcePackSha1;
     private final boolean resourcePackRequired;
     private final String resourcePackPrompt;
+    private final boolean bedrockPackEnabled;
+    private final String bedrockPackUrl;
 
     public BlumeConfig(@NotNull FileConfiguration cfg, @NotNull Logger log) {
         resourcePackEnabled = cfg.getBoolean("resource-pack.enabled", true);
@@ -22,12 +24,14 @@ public final class BlumeConfig {
         resourcePackSha1 = nullToEmpty(cfg.getString("resource-pack.sha1"));
         resourcePackRequired = cfg.getBoolean("resource-pack.required", true);
         resourcePackPrompt = cfg.getString("resource-pack.prompt", DEFAULT_PROMPT);
+        bedrockPackEnabled = cfg.getBoolean("resource-pack.bedrock.enabled", true);
+        bedrockPackUrl = nullToEmpty(cfg.getString("resource-pack.bedrock.url"));
 
         if (resourcePackEnabled && resourcePackUrl.isBlank()) {
-            log.warning("resource-pack.enabled is true but resource-pack.url is empty — pack will not be sent.");
+            log.warning("resource-pack.enabled is true but resource-pack.url is empty. Pack will not be sent.");
         }
         if (resourcePackEnabled && !resourcePackUrl.isBlank() && resourcePackSha1.isBlank()) {
-            log.warning("resource-pack.sha1 is empty — update plugins/Blume/config.yml after rebuilding the pack.");
+            log.warning("resource-pack.sha1 is empty. Update plugins/Blume/config.yml after rebuilding the pack.");
         }
     }
 
@@ -53,6 +57,14 @@ public final class BlumeConfig {
 
     public @NotNull String getResourcePackPrompt() {
         return resourcePackPrompt;
+    }
+
+    public boolean isBedrockPackEnabled() {
+        return bedrockPackEnabled;
+    }
+
+    public @NotNull String getBedrockPackUrl() {
+        return bedrockPackUrl;
     }
 
     private static @NotNull String nullToEmpty(String value) {

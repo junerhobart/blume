@@ -4,6 +4,9 @@ resource-pack:
   sha1: "${pack.sha1}"
   required: true
   prompt: "<green>Blume</green> uses a resource pack for custom items. Please accept."
+  bedrock:
+    enabled: true
+    url: "https://junerhobart.github.io/blume/blume-bedrock-pack.zip"
 
 admin:
   graylist:
