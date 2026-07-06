@@ -1,0 +1,20 @@
+<article class="feature-item">
+	<h2 id="{{ feature.metadata.slug }}" class="m-0">
+		<button type="button" class="feature-toggle mc-interactive relative flex justify-between items-center w-full text-left text-xl font-minecraft font-normal mc-text bg-block-grass mc-border mc-hover {{ accordion.heading }} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent px-4 py-3.5" aria-expanded="false" aria-controls="body-{{ feature.metadata.slug }}">
+			<span class="relative z-10 flex items-center gap-3 min-w-0 flex-1">
+				<span class="feature-icon relative w-8 h-8 min-w-[2rem] min-h-[2rem] block">
+					<img class="absolute inset-0 object-cover is-pixelated w-full h-full" src="{{ feature.metadata.icon }}" alt="">
+				</span>
+				<span class="truncate">{{ feature.metadata.title }}</span>
+			</span>
+			<svg data-accordion-icon class="mc-chevron relative z-10 w-5 h-5 shrink-0 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+		</button>
+	</h2>
+	<div id="body-{{ feature.metadata.slug }}" class="mc-accordion-panel">
+		<div class="bg-block-grass mc-border border-t-0">
+			<div class="feature-body">
+				<div class="feature-prose prose prose-invert max-w-none font-minecraft">{{ feature.html_content }}</div>
+			</div>
+		</div>
+	</div>
+</article>

@@ -2,6 +2,8 @@
 
 ## Building
 
+### Plugin
+
 ```bash
 git clone https://github.com/junerhobart/blume.git
 cd blume
@@ -12,11 +14,22 @@ The plugin jar is written to `target/Blume-<version>.jar`.
 
 A build also regenerates `docs/blume-pack.zip` from `resourcepack/`.
 
+### Website
+
+```bash
+cd docs/source
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+npm install
+./build.sh
+cd .. && python3 -m http.server 8765
+```
+
 ## Local testing
 
-1. run `'/Users/junehobart/Projects/blume/run/scripts/start.sh'`
+1. Run `'/Users/junehobart/Projects/blume/run/scripts/start.sh'`
 2. Join `localhost` and test.
-note: you can also run `'/Users/junehobart/Projects/blume/run/scripts/purge.sh'` remove server data (keeps important bits) and `'/Users/junehobart/Projects/blume/run/scripts/sync-plugin.sh'` and then in the server `/blume reload`
+
+Note: you can also run `'/Users/junehobart/Projects/blume/run/scripts/purge.sh'` to remove server data (keeps important bits), `'/Users/junehobart/Projects/blume/run/scripts/sync-plugin.sh'`, and then in the server `/blume reload`.
 
 ## Code guidelines
 

@@ -1,0 +1,49 @@
+[[categories]]
+id = "qol"
+title = "Quality of Life"
+banner = "dirt-path"
+content = [
+	"qol/double-doors.md",
+	"qol/desire-paths.md",
+	"qol/death-drops.md",
+	"qol/anvil-limit.md",
+	"qol/harvest-replant.md",
+	"qol/path-speed.md",
+	"qol/creeper-rebuild.md",
+]
+
+[[categories]]
+id = "ecology"
+title = "Ecology"
+banner = "farmland"
+content = [
+	"ecology/mixed-seeds.md",
+	"ecology/carrot-seeds.md",
+	"ecology/potato-seeds.md",
+	"ecology/wild-crops.md",
+	"ecology/natural-grass.md",
+	"ecology/pollination.md",
+	"ecology/pasture-welfare.md",
+]
+
+[[categories]]
+id = "enchants"
+title = "Enchantments"
+banner = "glow-berries"
+content = [
+	"enchants/auto-smelt.md",
+	"enchants/veinminer.md",
+	"enchants/timber.md",
+	"enchants/sickle.md",
+	"enchants/unbreakable.md",
+]
+
+[[categories]]
+id = "admin"
+title = "Administration"
+banner = "flowers"
+content = [
+	"admin/command-broadcast.md",
+	"admin/graylist.md",
+	"admin/vouch.md",
+]

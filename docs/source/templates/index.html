@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" class="dark bg-block-moss">
+	<head>
+		<title>Blume</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="Blume — a nature-focused Paper plugin with ecology, quality-of-life tweaks, and custom enchantments.">
+		<meta name="author" content="junerhobart">
+		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+		<link rel="icon" href="assets/icon.png" type="image/png">
+	</head>
+	<body class="mc-text font-minecraft">
+		<main class="relative z-10 mx-auto max-w-screen-lg px-4 pb-20 pt-8">
+			<section class="pb-12 text-center">
+				<img class="mx-auto mb-4 is-pixelated" src="assets/icon.png" width="96" height="96" alt="">
+				<h1 class="hero-title font-minecraft text-4xl md:text-5xl font-normal tracking-wide mc-text-heading">Blume</h1>
+				<p class="mt-3 text-lg mc-text-muted max-w-xl mx-auto">Vanilla-friendly ecology and quality-of-life for Paper servers.</p>
+				<div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+					<a class="mc-interactive mc-btn-press inline-flex items-center gap-2.5 font-minecraft text-lg mc-text bg-block-dirt mc-border mc-hover px-5 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent" href="https://github.com/junerhobart/blume" rel="noopener">
+						<i class="fa-brands fa-github text-4xl leading-none" aria-hidden="true"></i>
+						<span class="mc-layer-content">GitHub</span>
+					</a>
+					<a class="mc-interactive mc-btn-press inline-flex items-center gap-2.5 font-minecraft text-lg mc-text bg-block-dirt mc-border mc-hover px-5 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent" href="https://modrinth.com/plugin/blume-" rel="noopener">
+						<img class="h-8 w-8 shrink-0" src="assets/modrinth-mark.svg" width="32" height="32" alt="" aria-hidden="true">
+						<span class="mc-layer-content">Modrinth</span>
+					</a>
+				</div>
+				<div class="mt-6">
+					<button id="expand-collapse-all" type="button" aria-expanded="false" class="mc-interactive mc-btn-press relative z-[2] inline-flex items-center gap-2.5 font-minecraft text-xl mc-text bg-block-dirt mc-border mc-hover px-5 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent">
+						<svg class="mc-chevron w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+						<span id="expand-collapse-label" class="mc-layer-content">Expand All</span>
+					</button>
+				</div>
+			</section>
+			{{ each_category_content }}
+		</main>
+		<div id="the-mctooltip" class="relative z-10"></div>
+	</body>
+	<script>
+		var trapdoorOpenSound = 'assets/minecraft/sounds/block/wooden_trapdoor/open1.ogg';
+		var trapdoorCloseSound = 'assets/minecraft/sounds/block/wooden_trapdoor/close1.ogg';
+
+		function prefersReducedMotion() {
+			return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		}
+
+		function playTrapdoorSound(opening) {
+			if (prefersReducedMotion()) {
+				return;
+			}
+			var sound = new Audio(opening ? trapdoorOpenSound : trapdoorCloseSound);
+			sound.play().catch(function() {});
+		}
+
+		function setOpenVisuals(el, state) {
+			el.classList.toggle('is-open', state);
+			var iconEl = el.querySelector('[data-accordion-icon]') || el.querySelector('.mc-chevron');
+			if (iconEl) {
+				iconEl.classList.toggle('is-open', state);
+			}
+		}
+
+		function accordionSetState(el, state, playSound) {
+			el.setAttribute('aria-expanded', state ? 'true' : 'false');
+			setOpenVisuals(el, state);
+			var panelId = el.getAttribute('aria-controls');
+			if (panelId) {
+				document.getElementById(panelId).classList.toggle('is-open', state);
+			}
+			if (playSound) {
+				playTrapdoorSound(state);
+			}
+		}
+
+		function expandAllInstant(toggles, state) {
+			Array.prototype.forEach.call(toggles, function(el) {
+				accordionSetState(el, state, false);
+			});
+			playTrapdoorSound(state);
+		}
+
+		function bindMcInteraction() {
+			document.querySelectorAll('.feature-toggle.mc-interactive[aria-controls]').forEach(function(el) {
+				el.addEventListener('click', function() {
+					var active = el.getAttribute('aria-expanded') === 'true';
+					accordionSetState(el, !active, true);
+				});
+			});
+
+			var expandCollapseBtn = document.getElementById('expand-collapse-all');
+			var allExpanded = false;
+			expandCollapseBtn.addEventListener('click', function() {
+				allExpanded = !allExpanded;
+				var toggles = document.getElementsByClassName('feature-toggle');
+				expandAllInstant(toggles, allExpanded);
+				document.getElementById('expand-collapse-label').textContent = (allExpanded ? 'Collapse All' : 'Expand All');
+				accordionSetState(expandCollapseBtn, allExpanded, false);
+			});
+		}
+
+		document.addEventListener('DOMContentLoaded', function() {
+			bindMcInteraction();
+		});
+	</script>
+	<script>
+		var minecraftTooltip = document.getElementById('the-mctooltip');
+
+		Array.prototype.forEach.call(document.getElementsByClassName('mctooltip'), el => {
+			el.onmouseover = function(event) {
+				minecraftTooltip.innerHTML = event.target.dataset.mctooltip;
+				minecraftTooltip.style.display = 'block';
+				minecraftTooltip.classList.add('is-visible');
+			};
+			el.onmouseout = function() {
+				minecraftTooltip.classList.remove('is-visible');
+				minecraftTooltip.style.display = 'none';
+			};
+			el.onmousemove = function(event) {
+				positionTooltip(minecraftTooltip, 5, -30, event);
+			};
+		});
+
+		function positionTooltip(o, x, y, event) {
+			var posX = 0, posY = 0;
+			var e = event || window.event;
+			if (e.pageX || e.pageY) {
+				posX = e.pageX;
+				posY = e.pageY;
+			} else if (e.clientX || e.clientY) {
+				posX = event.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
+				posY = event.clientY + document.documentElement.scrollTop + document.body.scrollTop;
+			}
+			o.style.position = 'fixed';
+			o.style.top = (posY + y) + 'px';
+			if (event.clientX <= document.documentElement.clientWidth / 2) {
+				o.style.left = (posX + x) + 'px';
+				o.style.removeProperty('right');
+				o.style.maxWidth = (document.documentElement.clientWidth - (event.clientX + x) - 16) + 'px';
+			} else {
+				o.style.removeProperty('left');
+				o.style.right = (document.documentElement.scrollLeft + document.documentElement.clientWidth) - (posX - x) + 'px';
+				o.style.maxWidth = ((event.clientX - x) - 16) + 'px';
+			}
+		}
+
+		minecraftTooltip.style.display = 'none';
+	</script>
+</html>

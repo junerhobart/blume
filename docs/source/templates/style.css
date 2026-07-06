@@ -1,0 +1,623 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+	scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+.font-sans,
+.font-minecraft,
+.prose {
+	-webkit-font-smoothing: auto;
+	-moz-osx-font-smoothing: auto;
+}
+
+@font-face {
+	font-family: 'Minecraftia';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Minecraftia'), url('./Minecraftia.woff') format('woff');
+}
+
+.is-pixelated {
+	image-rendering: -moz-crisp-edges;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+#the-mctooltip {
+	position: fixed;
+	background-color: #100010;
+	background-color: rgba(16, 0, 16, 0.94);
+	padding: 0.375em;
+	font-family: Minecraftia;
+	font-size: 16px;
+	word-spacing: 4px;
+	line-height: 1.25em;
+	margin: 0.125em 0.25em;
+	pointer-events: none;
+	word-wrap: break-word;
+	z-index: 100;
+	color: #FFF;
+	text-shadow: 0.125em 0.125em 0 #3F3F3F;
+}
+
+#the-mctooltip::before {
+	content: "";
+	position: absolute;
+	top: 0.125em;
+	right: -0.125em;
+	bottom: 0.125em;
+	left: -0.125em;
+	border: 0.125em solid #100010;
+	border-style: none solid;
+	border-color: rgba(16, 0, 16, 0.94);
+}
+
+#the-mctooltip::after {
+	content: "";
+	position: absolute;
+	top: 0.125em;
+	right: 0;
+	bottom: 0.125em;
+	left: 0;
+	border: 0.125em solid #2D0A63;
+	border-image: -webkit-linear-gradient(rgba(80, 0, 255, 0.31), rgba(40, 0, 127, 0.31)) 1;
+	border-image: linear-gradient(rgba(80, 0, 255, 0.31), rgba(40, 0, 127, 0.31)) 1;
+}
+
+/* Blume — moss/grass palette; forest-tinted scrims, soft borders */
+:root {
+	--mc-tile: 128px;
+	--mc-border: rgba(22, 30, 18, 0.45);
+	--mc-border-strong: rgba(16, 22, 14, 0.62);
+	--mc-border-highlight: rgba(48, 62, 38, 0.55);
+	--mc-scrim-page: rgba(10, 16, 8, 0.26);
+	--mc-scrim-surface: rgba(12, 18, 10, 0.22);
+	--mc-scrim-bright: rgba(8, 14, 6, 0.34);
+	--mc-scrim-button: rgba(14, 20, 12, 0.18);
+	--mc-ink: #ffffff;
+	--mc-ink-heading: #ffffff;
+	--mc-ink-body: #eef2ea;
+	--mc-ink-muted: #c8d0c4;
+	--mc-ink-subtle: #aab4a6;
+	--mc-ink-gold: #ffe566;
+	--mc-shadow-ink: rgba(6, 10, 4, 0.88);
+	--mc-mod-trifles: #6dff6d;
+	--mc-mod-admin: #ff7070;
+	--mc-mod-bedtime: #9090ff;
+	--mc-mod-core: #ffbb33;
+	--mc-mod-enchantments: #ff77ff;
+	--mc-mod-regions: #77ffff;
+	--mc-mod-ecology: #66ee66;
+	--mc-mod-qol: #6dff6d;
+	--mc-mod-enchants: #ff77ff;
+}
+
+.mc-block-tile {
+	background-repeat: repeat;
+	background-size: var(--mc-tile) var(--mc-tile);
+	background-position: top left;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+html.bg-block-moss {
+	min-height: 100%;
+	background-color: #4a6b3a;
+	background-image: url('../assets/minecraft/textures/block/tiles/moss_block.png');
+	background-repeat: repeat;
+	background-size: var(--mc-tile) var(--mc-tile);
+	background-position: top left;
+	image-rendering: pixelated;
+}
+
+html.bg-block-moss::after {
+	content: "";
+	position: fixed;
+	inset: 0;
+	background: var(--mc-scrim-page);
+	pointer-events: none;
+	z-index: 0;
+}
+
+body {
+	position: relative;
+	z-index: 1;
+	background: transparent;
+}
+
+.bg-block-flowers,
+.bg-block-dirt-path,
+.bg-block-farmland,
+.bg-block-glow-berries,
+.bg-block-grass,
+.bg-block-dirt,
+.bg-block-rooted-dirt,
+.bg-block-coarse-dirt,
+.mc-divider {
+	position: relative;
+}
+
+.bg-block-flowers::before,
+.bg-block-dirt-path::before,
+.bg-block-farmland::before,
+.bg-block-glow-berries::before,
+.bg-block-grass::before,
+.bg-block-dirt::before,
+.bg-block-rooted-dirt::before,
+.bg-block-coarse-dirt::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-repeat: repeat;
+	background-size: var(--mc-tile) var(--mc-tile);
+	background-position: top left;
+	image-rendering: pixelated;
+	pointer-events: none;
+	z-index: 0;
+}
+
+.bg-block-flowers::before {
+	background-image: url('../assets/minecraft/textures/block/tiles/pink_petals.png');
+}
+
+.bg-block-dirt-path::before {
+	background-image: url('../assets/minecraft/textures/block/tiles/dirt_path_top.png');
+}
+
+.bg-block-farmland::before {
+	background-image: url('../assets/minecraft/textures/block/tiles/farmland.png');
+}
+
+.bg-block-glow-berries::before {
+	background-image: url('../assets/minecraft/textures/block/tiles/cave_vines_lit.png');
+}
+
+.bg-block-grass::before {
+	background-image: url('../assets/minecraft/textures/block/tiles/grass_block_top.png');
+}
+
+.bg-block-dirt::before {
+	background-image: url('../assets/minecraft/textures/block/tiles/dirt.png');
+}
+
+.bg-block-rooted-dirt::before {
+	background-image: url('../assets/minecraft/textures/block/tiles/rooted_dirt.png');
+}
+
+.bg-block-coarse-dirt::before {
+	background-image: url('../assets/minecraft/textures/block/tiles/coarse_dirt.png');
+}
+
+.bg-block-flowers::after,
+.bg-block-dirt-path::after,
+.bg-block-farmland::after,
+.bg-block-glow-berries::after,
+.bg-block-grass::after,
+.bg-block-dirt::after,
+.bg-block-rooted-dirt::after,
+.bg-block-coarse-dirt::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: var(--mc-scrim-surface);
+	pointer-events: none;
+	z-index: 0;
+}
+
+.bg-block-grass::after,
+.bg-block-flowers::after,
+.bg-block-glow-berries::after,
+.bg-block-dirt-path::after {
+	background: var(--mc-scrim-bright);
+}
+
+a.bg-block-dirt::after,
+button.bg-block-dirt::after {
+	background: var(--mc-scrim-button);
+}
+
+.bg-block-flowers > *,
+.bg-block-dirt-path > *,
+.bg-block-farmland > *,
+.bg-block-glow-berries > *,
+.bg-block-grass > *,
+.bg-block-dirt > *,
+.bg-block-rooted-dirt > *,
+.bg-block-coarse-dirt > * {
+	position: relative;
+	z-index: 1;
+}
+
+.feature-body {
+	padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.feature-toggle {
+	text-shadow: 1px 1px 0 var(--mc-shadow-ink);
+}
+
+.feature-status {
+	margin-top: 1.25rem;
+	padding-top: 1rem;
+	border-top: 2px solid var(--mc-border);
+}
+
+.feature-status:empty {
+	display: none;
+}
+
+.feature-item {
+	margin-bottom: 0.25rem;
+}
+
+.feature-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.category-block {
+	margin-top: 3rem;
+	margin-bottom: 1rem;
+}
+
+.category-block:first-of-type {
+	margin-top: 0;
+}
+
+.font-minecraft {
+	font-family: 'Minecraftia', monospace;
+	line-height: 1.65;
+}
+
+.prose.prose-invert,
+.feature-prose.prose-invert {
+	font-family: 'Minecraftia', monospace;
+	font-size: 1rem;
+	line-height: 1.75;
+	max-width: none;
+	color: var(--mc-ink-body);
+}
+
+.prose.prose-invert :where(p, li):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	line-height: 1.7;
+}
+
+.mc-hover:hover {
+	border-color: var(--mc-border-highlight);
+}
+
+.mc-border {
+	border: 2px solid var(--mc-border-strong);
+	box-shadow:
+		inset -2px -2px 0 rgba(0, 0, 0, 0.16),
+		inset 2px 2px 0 rgba(255, 255, 255, 0.07),
+		2px 2px 0 rgba(0, 0, 0, 0.18);
+}
+
+.mc-text {
+	color: var(--mc-ink);
+	text-shadow: 1px 1px 0 var(--mc-shadow-ink);
+}
+
+.mc-text-heading {
+	color: var(--mc-ink-heading);
+	text-shadow: 1px 1px 0 var(--mc-shadow-ink), 2px 2px 0 var(--mc-shadow-ink);
+}
+
+.mc-layer-content {
+	position: relative;
+	z-index: 1;
+}
+
+.mc-text-muted {
+	color: var(--mc-ink-muted);
+	text-shadow: 1px 1px 0 var(--mc-shadow-ink);
+}
+
+.mc-text-gold {
+	color: var(--mc-ink-gold);
+	text-shadow: 1px 1px 0 var(--mc-shadow-ink);
+}
+
+.mc-text-gray {
+	color: var(--mc-ink-subtle);
+	text-shadow: 1px 1px 0 var(--mc-shadow-ink);
+}
+
+.mc-module {
+	text-shadow: none;
+}
+
+.mc-module-trifles {
+	color: var(--mc-mod-trifles);
+}
+
+.mc-module-admin {
+	color: var(--mc-mod-admin);
+}
+
+.mc-module-bedtime {
+	color: var(--mc-mod-bedtime);
+}
+
+.mc-module-core {
+	color: var(--mc-mod-core);
+}
+
+.mc-module-enchantments {
+	color: var(--mc-mod-enchantments);
+}
+
+.mc-module-regions {
+	color: var(--mc-mod-regions);
+}
+
+.mc-module-ecology {
+	color: var(--mc-mod-ecology);
+}
+
+.mc-module-qol {
+	color: var(--mc-mod-qol);
+}
+
+.mc-module-enchants {
+	color: var(--mc-mod-enchants);
+}
+
+.mc-module-admin {
+	color: var(--mc-mod-admin);
+}
+
+.mc-module-velocity {
+	color: var(--mc-mod-velocity);
+}
+
+.mc-divider {
+	height: 5px;
+	border: 1px solid var(--mc-border);
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+	background-image: url('../assets/minecraft/textures/block/tiles/vine.png');
+	background-repeat: repeat;
+	background-size: var(--mc-tile) var(--mc-tile);
+	image-rendering: pixelated;
+}
+
+.mc-divider::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: var(--mc-scrim-surface);
+	pointer-events: none;
+}
+
+/* Tailwind typography decorates inline code with literal backtick characters */
+.prose :where(code):not(:where(pre *))::before,
+.prose :where(code):not(:where(pre *))::after,
+.feature-prose.prose-invert :where(code):not(:where(pre *))::before,
+.feature-prose.prose-invert :where(code):not(:where(pre *))::after {
+	content: none !important;
+}
+
+/* Microanimations — instant/snappy like MC menus (no smooth easing) */
+@keyframes mc-blink-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+.hero-title {
+	animation: mc-blink-in 0.08s step-end both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hero-title {
+		animation: none;
+		opacity: 1;
+	}
+}
+
+.category-heading {
+	display: block;
+	width: 100%;
+}
+
+.mc-chevron.is-open {
+	transform: rotate(180deg);
+}
+
+.mc-accordion-panel {
+	display: none;
+}
+
+.mc-accordion-panel.is-open {
+	display: block;
+}
+
+.mc-interactive {
+	transition: none;
+}
+
+.mc-chevron {
+	filter: none;
+}
+
+.prose.prose-invert {
+	--tw-prose-body: var(--mc-ink-body);
+	--tw-prose-invert-body: var(--mc-ink-body);
+	--tw-prose-bold: var(--mc-ink);
+	--tw-prose-invert-bold: var(--mc-ink);
+	--tw-prose-headings: var(--mc-ink);
+	--tw-prose-invert-headings: var(--mc-ink);
+	--tw-prose-links: var(--mc-ink);
+	--tw-prose-invert-links: var(--mc-ink);
+	--tw-prose-bullets: var(--mc-ink-muted);
+	--tw-prose-invert-bullets: var(--mc-ink-muted);
+	--tw-prose-counters: var(--mc-ink-muted);
+	--tw-prose-invert-counters: var(--mc-ink-muted);
+}
+
+.prose.prose-invert :where(a:hover):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	color: var(--mc-ink-gold);
+}
+
+.mc-module {
+	transition: none;
+}
+
+.mc-btn-press:active,
+.feature-toggle:active {
+	transform: translate(1px, 1px);
+	box-shadow:
+		inset -1px -1px 0 rgba(0, 0, 0, 0.22),
+		inset 1px 1px 0 rgba(255, 255, 255, 0.05),
+		1px 1px 0 rgba(0, 0, 0, 0.15);
+}
+
+#the-mctooltip.is-visible {
+	opacity: 1;
+}
+
+.prose a {
+	transition: none;
+}
+
+.feature-prose.prose-invert :where(p):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	margin-top: 0.85em;
+	margin-bottom: 0.85em;
+}
+
+.feature-prose.prose-invert :where(p:first-child):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	margin-top: 0;
+}
+
+.feature-prose.prose-invert :where(h2):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	font-size: 1.125rem;
+	margin-top: 1.75em;
+	margin-bottom: 0.65em;
+	padding-bottom: 0.35em;
+	border-bottom: 1px solid var(--mc-border);
+	color: var(--mc-ink-heading);
+}
+
+.feature-prose.prose-invert :where(h2:first-child):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	margin-top: 0;
+}
+
+.feature-prose.prose-invert :where(h3):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	font-size: 1rem;
+	margin-top: 1.35em;
+	margin-bottom: 0.5em;
+	color: var(--mc-ink-heading);
+}
+
+.feature-prose.prose-invert :where(ul, ol):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	margin: 0.85em 0 1em;
+	padding-left: 1.5em;
+}
+
+.feature-prose.prose-invert :where(li):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	margin: 0.4em 0;
+	color: var(--mc-ink-body);
+}
+
+.feature-prose.prose-invert :where(ul > li):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	list-style-type: disc;
+}
+
+.feature-prose.prose-invert :where(ol > li):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	list-style-type: decimal;
+}
+
+.feature-prose.prose-invert :where(table):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	width: 100%;
+	margin: 1.25em 0;
+	border-collapse: collapse;
+	display: table;
+	overflow-x: auto;
+	border: 1px solid var(--mc-border-strong);
+	background: rgba(8, 12, 6, 0.25);
+}
+
+.feature-prose.prose-invert :where(thead):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	background: rgba(0, 0, 0, 0.55);
+}
+
+.feature-prose.prose-invert :where(th, td):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	border: 1px solid var(--mc-border);
+	padding: 0.55em 0.75em;
+	text-align: left;
+	vertical-align: top;
+}
+
+.feature-prose.prose-invert :where(th):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	color: var(--mc-ink-gold);
+	font-weight: 400;
+}
+
+.feature-prose.prose-invert :where(tbody tr:nth-child(even)):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	background: rgba(255, 255, 255, 0.04);
+}
+
+.feature-prose.prose-invert :where(code):not(:where([class~=not-prose], [class~=not-prose] *)):not(:where(pre *)) {
+	background: rgba(8, 12, 6, 0.45);
+	border: 1px solid var(--mc-border);
+	padding: 0.15em 0.45em;
+	font-size: 0.875em;
+	color: var(--mc-ink-gold);
+	font-family: 'Minecraftia', monospace;
+}
+
+.feature-prose.prose-invert :where(pre):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	background: rgba(8, 12, 6, 0.5);
+	border: 1px solid var(--mc-border-strong);
+	padding: 0.85em 1em;
+	margin: 1em 0;
+	overflow-x: auto;
+}
+
+.feature-prose.prose-invert :where(pre code):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	background: transparent;
+	border: 0;
+	padding: 0;
+	color: var(--mc-ink-body);
+}
+
+.feature-prose.prose-invert :where(strong):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	color: var(--mc-ink);
+}
+
+.feature-prose.prose-invert :where(a):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	color: var(--mc-ink);
+	text-decoration: underline;
+}
+
+.feature-prose.prose-invert :where(a:hover):not(:where([class~=not-prose], [class~=not-prose] *)) {
+	color: var(--mc-ink-gold);
+}
+
+.feature-body > div:empty {
+	display: none;
+}

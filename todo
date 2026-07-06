@@ -41,8 +41,8 @@
 
 ## docs, and misc
 
-[ ] make website
+[x] make website
 [x] make icon
-[ ] modrinth page
+[x] modrinth page
     [ ] get images for modrinth page
-[ ] github actions
+[x] github actions
