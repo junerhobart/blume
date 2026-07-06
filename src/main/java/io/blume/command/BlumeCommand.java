@@ -32,5 +32,6 @@ public final class BlumeCommand {
     private void sendHelp(@NotNull CommandSender sender) {
         sender.sendMessage(Component.text("[Blume] Commands:", NamedTextColor.GOLD));
         sender.sendMessage(Component.text("  /blume reload  - Reload config and re-send resource pack", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("  /blume give <item> [amount] [player]  - Give ecology seeds", NamedTextColor.YELLOW));
     }
 }

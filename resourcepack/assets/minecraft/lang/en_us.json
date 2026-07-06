@@ -3,5 +3,8 @@
   "enchantment.blume.veinminer": "Veinminer",
   "enchantment.blume.timber": "Timber",
   "enchantment.blume.sickle": "Sickle",
-  "enchantment.blume.unbreakable": "Unbreakable"
+  "enchantment.blume.unbreakable": "Unbreakable",
+  "item.blume.carrot_seeds": "Carrot Seeds",
+  "item.blume.potato_seeds": "Potato Seeds",
+  "item.blume.mixed_seeds": "Mixed Seeds"
 }

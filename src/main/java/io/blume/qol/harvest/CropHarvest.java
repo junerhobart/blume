@@ -1,5 +1,8 @@
 package io.blume.qol.harvest;
 
+import io.blume.ecology.harvest.CropOriginHelper;
+import io.blume.ecology.harvest.PoisonPotatoHandler;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
@@ -23,7 +26,15 @@ public final class CropHarvest {
         Material.NETHER_WART
     );
 
+    private static CropOriginHelper originHelper;
+    private static PoisonPotatoHandler poisonHandler;
+
     private CropHarvest() {}
+
+    public static void inject(@Nullable CropOriginHelper originHelper, @Nullable PoisonPotatoHandler poisonHandler) {
+        CropHarvest.originHelper = originHelper;
+        CropHarvest.poisonHandler = poisonHandler;
+    }
 
     public static boolean isMatureCrop(@NotNull Block block) {
         if (!CROPS.contains(block.getType())) {
@@ -41,20 +52,59 @@ public final class CropHarvest {
         }
 
         List<ItemStack> drops = new ArrayList<>(block.getDrops(tool));
-        ReplantInfo replant = replantInfo(block.getType());
+        if (poisonHandler != null) {
+            poisonHandler.modifyDrops(block, drops);
+        }
+
+        ReplantResult replant = determineReplant(block);
         if (replant == null) {
             dropAll(player, block, drops);
-            block.breakNaturally(tool, true);
+            breakBlock(player, block, tool);
             return;
         }
 
-        if (!consumeOne(drops, replant.material())) {
+        if (replant.consumeFromDrops() && !consumeOne(drops, replant.material())) {
+            if (canReplantInPlace(block, drops, replant.material())) {
+                dropAll(player, block, drops);
+                resetAge(block);
+                return;
+            }
             dropAll(player, block, drops);
-            block.breakNaturally(tool, true);
+            breakBlock(player, block, tool);
             return;
         }
 
         dropAll(player, block, drops);
+        resetAge(block);
+    }
+
+    private static void breakBlock(@NotNull Player player, @NotNull Block block, @NotNull ItemStack tool) {
+        if (player.getGameMode() == GameMode.CREATIVE) {
+            block.setType(Material.AIR, false);
+            return;
+        }
+        block.breakNaturally(tool, true);
+    }
+
+    private static @Nullable ReplantResult determineReplant(@NotNull Block block) {
+        if (originHelper != null) {
+            CropOriginHelper.ReplantChoice choice = originHelper.replantChoice(block);
+            if (choice != null) {
+                if (choice.replant() == null) {
+                    return null;
+                }
+                return new ReplantResult(choice.replant().getType(), choice.consumeFromDrops());
+            }
+            if (originHelper.usesInPlaceReplant(block)) {
+                return new ReplantResult(Material.WHEAT_SEEDS, false);
+            }
+        }
+
+        ReplantInfo info = replantInfo(block.getType());
+        return info == null ? null : new ReplantResult(info.material(), true);
+    }
+
+    private static void resetAge(@NotNull Block block) {
         if (block.getBlockData() instanceof Ageable ageable) {
             ageable.setAge(0);
             block.setBlockData(ageable, false);
@@ -62,12 +112,37 @@ public final class CropHarvest {
     }
 
     private static void dropAll(@NotNull Player player, @NotNull Block block, @NotNull List<ItemStack> drops) {
+        if (player.getGameMode() == GameMode.CREATIVE) {
+            return;
+        }
         for (ItemStack drop : drops) {
             if (drop == null || drop.getType().isAir() || drop.getAmount() <= 0) {
                 continue;
             }
             block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), drop);
         }
+    }
+
+    private static boolean canReplantInPlace(
+        @NotNull Block block,
+        @NotNull List<ItemStack> drops,
+        @NotNull Material replantMaterial
+    ) {
+        if (originHelper != null && originHelper.usesInPlaceReplant(block)) {
+            return true;
+        }
+        return replantMaterial == Material.POTATO
+            && !containsMaterial(drops, Material.POTATO)
+            && containsMaterial(drops, Material.POISONOUS_POTATO);
+    }
+
+    private static boolean containsMaterial(@NotNull List<ItemStack> drops, @NotNull Material material) {
+        for (ItemStack drop : drops) {
+            if (drop != null && drop.getType() == material && drop.getAmount() > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean consumeOne(@NotNull List<ItemStack> drops, @NotNull Material material) {
@@ -93,4 +168,6 @@ public final class CropHarvest {
     }
 
     public record ReplantInfo(@NotNull Material material) {}
+
+    private record ReplantResult(@NotNull Material material, boolean consumeFromDrops) {}
 }

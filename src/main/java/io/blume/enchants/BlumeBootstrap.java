@@ -1,5 +1,6 @@
 package io.blume.enchants;
 
+import io.papermc.paper.datapack.DatapackRegistrar;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -18,6 +19,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Set;
 
 public final class BlumeBootstrap implements PluginBootstrap {
@@ -35,6 +38,10 @@ public final class BlumeBootstrap implements PluginBootstrap {
 
     @Override
     public void bootstrap(@NotNull BootstrapContext context) {
+        context.getLifecycleManager().registerEventHandler(
+            LifecycleEvents.DATAPACK_DISCOVERY.newHandler(event -> discoverEcologyDatapack(event.registrar()))
+        );
+
         context.getLifecycleManager().registerEventHandler(
             RegistryEvents.ENCHANTMENT.compose().newHandler(event -> {
                 event.registry().register(BlumeEnchantments.AUTO_SMELT, b ->
@@ -141,6 +148,18 @@ public final class BlumeBootstrap implements PluginBootstrap {
             .maximumCost(TREASURE_MAX)
             .anvilCost(8)
             .activeSlots(EquipmentSlotGroup.ANY);
+    }
+
+    private static void discoverEcologyDatapack(@NotNull DatapackRegistrar registrar) {
+        var resource = BlumeBootstrap.class.getResource("/blume_datapack");
+        if (resource == null) {
+            throw new RuntimeException("Blume ecology datapack missing from plugin jar");
+        }
+        try {
+            registrar.discoverPack(resource.toURI(), "ecology");
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException("Failed to discover Blume ecology datapack", e);
+        }
     }
 
     private static @NotNull Component enchantName(@NotNull String displayName) {

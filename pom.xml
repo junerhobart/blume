@@ -8,7 +8,7 @@
 
     <groupId>io.blume</groupId>
     <artifactId>Blume</artifactId>
-    <version>0.2</version>
+    <version>0.3</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -52,10 +52,25 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
+        <filters>
+            <filter>${project.build.directory}/pack-sha1.properties</filter>
+        </filters>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <includes>
+                    <include>config.yml</include>
+                    <include>paper-plugin.yml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>config.yml</exclude>
+                    <exclude>paper-plugin.yml</exclude>
+                </excludes>
             </resource>
         </resources>
         <plugins>
@@ -86,19 +101,23 @@
                 <executions>
                     <execution>
                         <id>resource-pack-zip</id>
-                        <phase>package</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
                             <target>
                                 <property name="pack.zip" location="${project.basedir}/docs/blume-pack.zip"/>
+                                <property name="pack.sha1.file"
+                                          location="${project.build.directory}/pack-sha1.properties"/>
                                 <mkdir dir="${project.basedir}/docs"/>
                                 <zip destfile="${pack.zip}"
                                      basedir="${project.basedir}/resourcepack"/>
                                 <checksum file="${pack.zip}"
                                           algorithm="SHA-1"
                                           property="pack.sha1"/>
+                                <echo file="${pack.sha1.file}"
+                                      message="pack.sha1=${pack.sha1}"/>
                                 <echo message="Resource pack: docs/blume-pack.zip"/>
                                 <echo message="SHA-1: ${pack.sha1}"/>
                             </target>

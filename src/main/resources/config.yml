@@ -1,7 +1,7 @@
 resource-pack:
   enabled: true
   url: "https://junerhobart.github.io/blume/blume-pack.zip"
-  sha1: "bf9d3bbaf308f1c43e12d328ee5f6d41fddc155d"
+  sha1: "${pack.sha1}"
   required: true
   prompt: "<green>Blume</green> uses a resource pack for custom items. Please accept."
 
@@ -78,3 +78,110 @@ enchants:
     radius-by-level: [1, 2, 3]
   unbreakable:
     enabled: true
+
+ecology:
+  enabled: true
+  potato-seeds:
+    poison-whole-crop-chance: 0.60
+  mixed-seeds:
+    grass-chance: 0.65
+    crop-chance: 0.35
+    drop-min: 0
+    drop-max: 2
+  wild-crops:
+    enabled: true
+    biome-filter: false
+    max-per-chunk: 16
+    spawn-chance: 0.35
+    patches-per-chunk: 3
+    biome-allowlist:
+      - plains
+      - forest
+      - meadow
+      - savanna
+      - taiga
+      - jungle
+      - swamp
+      - river
+  natural-grass:
+    enabled: true
+    tick-interval-seconds: 10
+    short-grass-chance: 0.25
+    tall-grass-chance: 0.12
+    invade-farmland: false
+    invade-farmland-chance: 0.08
+  pollination:
+    # Crop boosts never clear bee nectar; vanilla hive deposit handles honey.
+    enabled: true
+    tick-interval-seconds: 5
+    crop-cooldown-seconds: 20
+    flower-spread-chance: 0.05
+  husbandry:
+    enabled: true
+    max-pasture-radius: 48
+    min-blocks-per-animal:
+      cow: 64
+      sheep: 48
+      pig: 40
+      chicken: 12
+    tier-multipliers:
+      good: 1.5
+      fair: 2.5
+    water-boost: true
+    sunlight-boost-enabled: true
+    sunlight-boost-threshold: 0.60
+    standing-no-sky-penalty: true
+    sunlight-yield-bonus: 0.10
+    shelter-required-max-radius: 24
+    flooring:
+      good-blocks:
+        - GRASS_BLOCK
+        - MOSS_BLOCK
+        - MOSS_CARPET
+        - PODZOL
+        - DIRT
+        - COARSE_DIRT
+        - ROOTED_DIRT
+        - GRAVEL
+        - CLAY
+        - MUD
+        - SAND
+      bad-blocks:
+        - HOPPER
+        - DROPPER
+        - DISPENSER
+        - MAGMA_BLOCK
+        - CAMPFIRE
+        - SOUL_CAMPFIRE
+        - CACTUS
+        - SWEET_BERRY_BUSH
+        - WITHER_ROSE
+        - LAVA
+      good-boost-threshold: 0.60
+      bad-penalty-threshold: 0.15
+      standing-bad-forces-poor: true
+    bonuses:
+      excellent:
+        wool-drop-multiplier: 2.0
+        egg-bonus-guaranteed: true
+        breed-twin-chance: 0.25
+        baby-growth-multiplier: 2.0
+        wool-regrow-multiplier: 0.5
+        love-mode-multiplier: 0.5
+        kill-bonus-roll: 1.0
+      good:
+        wool-drop-multiplier: 1.5
+        egg-bonus-chance: 0.50
+        breed-twin-chance: 0.15
+        baby-growth-multiplier: 1.5
+        kill-bonus-chance: 0.50
+      fair:
+        egg-bonus-chance: 0.25
+        baby-growth-multiplier: 1.25
+      poor:
+        egg-lay-cancel-chance: 0.50
+        wool-penalty-min: 1
+        wool-regrow-multiplier: 1.5
+        baby-growth-multiplier: 0.75
+        love-mode-multiplier: 1.5
+        kill-penalty-roll: 1

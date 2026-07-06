@@ -5,6 +5,9 @@ import io.blume.admin.AdminConfig;
 import io.blume.admin.AdminModule;
 import io.blume.enchants.EnchantsConfig;
 import io.blume.enchants.EnchantsModule;
+import io.blume.ecology.EcologyConfig;
+import io.blume.ecology.EcologyModule;
+import io.blume.ecology.command.EcologyGiveCommand;
 import io.blume.command.BlumeCommand;
 import io.blume.config.BlumeConfig;
 import io.blume.listener.PlayerJoinListener;
@@ -30,6 +33,8 @@ public final class BlumePlugin extends JavaPlugin {
     private AdminModule adminModule;
     private EnchantsConfig enchantsConfig;
     private EnchantsModule enchantsModule;
+    private EcologyConfig ecologyConfig;
+    private EcologyModule ecologyModule;
 
     @Override
     public void onEnable() {
@@ -38,9 +43,11 @@ public final class BlumePlugin extends JavaPlugin {
         qolConfig = new QolConfig(getConfig());
         adminConfig = new AdminConfig(getConfig());
         enchantsConfig = new EnchantsConfig(getConfig());
+        ecologyConfig = new EcologyConfig(getConfig());
         resourcePackService = new ResourcePackService(this, blumeConfig);
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, resourcePackService), this);
+        getServer().getScheduler().runTaskLater(this, this::sendResourcePackToOnlinePlayers, 1L);
 
         qolModule = new QolModule(this, qolConfig);
         qolModule.enable();
@@ -51,6 +58,9 @@ public final class BlumePlugin extends JavaPlugin {
         enchantsModule = new EnchantsModule(this, enchantsConfig);
         enchantsModule.enable();
 
+        ecologyModule = new EcologyModule(this, ecologyConfig);
+        ecologyModule.enable();
+
         BlumeCommand cmd = new BlumeCommand(this);
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             event.registrar().register(
@@ -59,6 +69,7 @@ public final class BlumePlugin extends JavaPlugin {
                     .executes(ctx -> { cmd.execute(ctx.getSource().getSender(), new String[0]); return 1; })
                     .then(Commands.literal("reload")
                         .executes(ctx -> { cmd.execute(ctx.getSource().getSender(), new String[]{"reload"}); return 1; }))
+                    .then(EcologyGiveCommand.literal(this))
                     .build(),
                 "Blume admin commands."
             );
@@ -98,6 +109,10 @@ public final class BlumePlugin extends JavaPlugin {
             enchantsModule.disable();
             enchantsModule = null;
         }
+        if (ecologyModule != null) {
+            ecologyModule.disable();
+            ecologyModule = null;
+        }
         if (qolModule != null) {
             qolModule.disable();
             qolModule = null;
@@ -111,6 +126,7 @@ public final class BlumePlugin extends JavaPlugin {
         qolConfig = new QolConfig(cfg);
         adminConfig = new AdminConfig(cfg);
         enchantsConfig = new EnchantsConfig(cfg);
+        ecologyConfig = new EcologyConfig(cfg);
         resourcePackService.reload(blumeConfig);
 
         if (qolModule != null) {
@@ -122,7 +138,14 @@ public final class BlumePlugin extends JavaPlugin {
         if (enchantsModule != null) {
             enchantsModule.reload(enchantsConfig);
         }
+        if (ecologyModule != null) {
+            ecologyModule.reload(ecologyConfig);
+        }
 
+        sendResourcePackToOnlinePlayers();
+    }
+
+    private void sendResourcePackToOnlinePlayers() {
         for (Player player : getServer().getOnlinePlayers()) {
             resourcePackService.sendTo(player);
         }
@@ -134,5 +157,9 @@ public final class BlumePlugin extends JavaPlugin {
 
     public ResourcePackService resourcePackService() {
         return resourcePackService;
+    }
+
+    public EcologyModule ecologyModule() {
+        return ecologyModule;
     }
 }

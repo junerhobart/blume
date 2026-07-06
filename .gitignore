@@ -4,8 +4,11 @@ target/
 .DS_Store
 
 run/*
-!run/start.sh
-!run/sync-plugin.sh
+!run/scripts/
+!run/scripts/**
+!run/server.properties
+!run/bukkit.yml
+!run/ops.json
 
 .cursor/
 .cursorignore
