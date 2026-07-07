@@ -33,10 +33,6 @@
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
-        <repository>
-            <id>opencollab</id>
-            <url>https://repo.opencollab.dev/main/</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -52,19 +48,10 @@
             <version>5.4</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.geysermc.geyser</groupId>
-            <artifactId>api</artifactId>
-            <version>2.9.6-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <filters>
-            <filter>${project.build.directory}/pack-sha1.properties</filter>
-        </filters>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -118,8 +105,6 @@
                         <configuration>
                             <target>
                                 <property name="pack.zip" location="${project.basedir}/docs/blume-pack.zip"/>
-                                <property name="pack.sha1.file"
-                                          location="${project.build.directory}/pack-sha1.properties"/>
                                 <property name="bedrock.stage"
                                           location="${project.build.directory}/bedrock-pack-stage"/>
                                 <property name="bedrock.zip"
@@ -129,13 +114,9 @@
                                 <mkdir dir="${project.basedir}/docs"/>
                                 <zip destfile="${pack.zip}"
                                      basedir="${project.basedir}/resourcepack/java"/>
-                                <checksum file="${pack.zip}"
-                                          algorithm="SHA-1"
-                                          property="pack.sha1"/>
-                                <echo file="${pack.sha1.file}"
-                                      message="pack.sha1=${pack.sha1}"/>
+                                <copy file="${pack.zip}"
+                                      tofile="${project.build.directory}/classes/java-pack.zip"/>
                                 <echo message="Resource pack: docs/blume-pack.zip"/>
-                                <echo message="SHA-1: ${pack.sha1}"/>
                                 <delete dir="${bedrock.stage}" quiet="true"/>
                                 <mkdir dir="${bedrock.stage}/textures/items"/>
                                 <copy todir="${bedrock.stage}">
@@ -149,6 +130,10 @@
                                     </fileset>
                                 </copy>
                                 <zip destfile="${bedrock.zip}" basedir="${bedrock.stage}"/>
+                                <copy file="${bedrock.zip}"
+                                      tofile="${project.build.directory}/classes/bedrock-pack.zip"/>
+                                <copy file="${project.basedir}/resourcepack/bedrock/geyser_items.json"
+                                      tofile="${project.build.directory}/classes/blume-geyser-mappings.json"/>
                                 <copy file="${project.basedir}/resourcepack/bedrock/geyser_items.json"
                                       tofile="${geyser.mappings}"/>
                                 <echo message="Bedrock pack: docs/blume-bedrock-pack.zip"/>

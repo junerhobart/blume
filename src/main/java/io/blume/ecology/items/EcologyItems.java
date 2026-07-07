@@ -28,6 +28,10 @@ public final class EcologyItems {
     private static final Key POTATO_MODEL = Key.key("blume", "potato_seeds");
     private static final Key MIXED_MODEL = Key.key("blume", "mixed_seeds");
 
+    private static final String CARROT_NAME = "Carrot Seeds";
+    private static final String POTATO_NAME = "Potato Seeds";
+    private static final String MIXED_NAME = "Mixed Seeds";
+
     public EcologyItems() {
     }
 
@@ -61,24 +65,24 @@ public final class EcologyItems {
     }
 
     public @NotNull ItemStack createCarrotSeeds(int amount) {
-        return createSeed("item.blume.carrot_seeds", CARROT_MODEL, amount);
+        return createSeed(CARROT_NAME, CARROT_MODEL, amount);
     }
 
     public @NotNull ItemStack createPotatoSeeds(int amount) {
-        return createSeed("item.blume.potato_seeds", POTATO_MODEL, amount);
+        return createSeed(POTATO_NAME, POTATO_MODEL, amount);
     }
 
     public @NotNull ItemStack createMixedSeeds(int amount) {
-        return createSeed("item.blume.mixed_seeds", MIXED_MODEL, amount);
+        return createSeed(MIXED_NAME, MIXED_MODEL, amount);
     }
 
     private @NotNull ItemStack createSeed(
-        @NotNull String translationKey,
+        @NotNull String displayName,
         @NotNull Key model,
         int amount
     ) {
         ItemStack stack = ItemStack.of(Material.WHEAT_SEEDS, Math.max(1, amount));
-        Component name = Component.translatable(translationKey)
+        Component name = Component.text(displayName)
             .decoration(TextDecoration.ITALIC, false);
         stack.setData(DataComponentTypes.ITEM_NAME, name);
         stack.setData(DataComponentTypes.ITEM_MODEL, model);

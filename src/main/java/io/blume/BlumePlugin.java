@@ -10,11 +10,13 @@ import io.blume.ecology.EcologyModule;
 import io.blume.ecology.command.EcologyGiveCommand;
 import io.blume.command.BlumeCommand;
 import io.blume.config.BlumeConfig;
+import io.blume.geyser.GeyserAssetInstaller;
 import io.blume.listener.PlayerJoinListener;
 import io.blume.qol.QolConfig;
 import io.blume.qol.QolModule;
-import io.blume.geyser.GeyserIntegration;
+import io.blume.resourcepack.JavaResourcePackSource;
 import io.blume.resourcepack.ResourcePackService;
+import io.blume.update.UpdateChecker;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
@@ -30,7 +32,7 @@ public final class BlumePlugin extends JavaPlugin {
     private QolConfig qolConfig;
     private AdminConfig adminConfig;
     private ResourcePackService resourcePackService;
-    private GeyserIntegration geyserIntegration;
+    private JavaResourcePackSource javaResourcePackSource;
     private QolModule qolModule;
     private AdminModule adminModule;
     private EnchantsConfig enchantsConfig;
@@ -40,12 +42,8 @@ public final class BlumePlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        if (getServer().getPluginManager().getPlugin("Geyser-Spigot") == null) {
-            return;
-        }
         saveDefaultConfig();
-        geyserIntegration = new GeyserIntegration(this, new BlumeConfig(getConfig(), getLogger()));
-        geyserIntegration.enable();
+        GeyserAssetInstaller.install(this, new BlumeConfig(getConfig(), getLogger()), getLogger());
     }
 
     @Override
@@ -56,19 +54,18 @@ public final class BlumePlugin extends JavaPlugin {
         adminConfig = new AdminConfig(getConfig());
         enchantsConfig = new EnchantsConfig(getConfig());
         ecologyConfig = new EcologyConfig(getConfig());
-        resourcePackService = new ResourcePackService(this, blumeConfig);
-        if (geyserIntegration == null) {
-            geyserIntegration = new GeyserIntegration(this, blumeConfig);
-            geyserIntegration.enable();
-        } else {
-            geyserIntegration.setConfig(blumeConfig);
-            if (!geyserIntegration.isRegistered()) {
-                geyserIntegration.enable();
-            }
-        }
+
+        javaResourcePackSource = JavaResourcePackSource.start(this, blumeConfig, getLogger());
+        resourcePackService = new ResourcePackService(
+            this,
+            javaResourcePackSource,
+            blumeConfig.getResourcePackPrompt(),
+            blumeConfig.isResourcePackRequired()
+        );
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, resourcePackService), this);
         getServer().getScheduler().runTaskLater(this, this::sendResourcePackToOnlinePlayers, 1L);
+        UpdateChecker.checkAsync(this, blumeConfig);
 
         qolModule = new QolModule(this, qolConfig);
         qolModule.enable();
@@ -122,6 +119,10 @@ public final class BlumePlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (javaResourcePackSource != null) {
+            javaResourcePackSource.close();
+            javaResourcePackSource = null;
+        }
         if (adminModule != null) {
             adminModule.disable();
             adminModule = null;
@@ -138,10 +139,6 @@ public final class BlumePlugin extends JavaPlugin {
             qolModule.disable();
             qolModule = null;
         }
-        if (geyserIntegration != null) {
-            geyserIntegration.disable();
-            geyserIntegration = null;
-        }
     }
 
     public void reload() {
@@ -152,10 +149,17 @@ public final class BlumePlugin extends JavaPlugin {
         adminConfig = new AdminConfig(cfg);
         enchantsConfig = new EnchantsConfig(cfg);
         ecologyConfig = new EcologyConfig(cfg);
-        resourcePackService.reload(blumeConfig);
-        if (geyserIntegration != null) {
-            geyserIntegration.reload(blumeConfig);
+
+        if (javaResourcePackSource != null) {
+            javaResourcePackSource.close();
         }
+        javaResourcePackSource = JavaResourcePackSource.start(this, blumeConfig, getLogger());
+        resourcePackService.reload(
+            javaResourcePackSource,
+            blumeConfig.getResourcePackPrompt(),
+            blumeConfig.isResourcePackRequired()
+        );
+        GeyserAssetInstaller.install(this, blumeConfig, getLogger());
 
         if (qolModule != null) {
             qolModule.reload(qolConfig);

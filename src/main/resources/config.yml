@@ -1,12 +1,18 @@
 resource-pack:
   enabled: true
   url: "https://junerhobart.github.io/blume/blume-pack.zip"
-  sha1: "${pack.sha1}"
+  builtin-host: false
+  host: ""
+  port: 8765
   required: true
   prompt: "<green>Blume</green> uses a resource pack for custom items. Please accept."
   bedrock:
     enabled: true
-    url: "https://junerhobart.github.io/blume/blume-bedrock-pack.zip"
+
+updates:
+  check: true
+  modrinth-slug: ""
+  github-repo: "junerhobart/blume"
 
 admin:
   graylist:

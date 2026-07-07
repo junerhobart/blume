@@ -13,7 +13,7 @@
               "components": {
                 "minecraft:item_model": "blume:mixed_seeds",
                 "minecraft:item_name": {
-                  "translate": "item.blume.mixed_seeds",
+                  "text": "Mixed Seeds",
                   "italic": false
                 }
               }

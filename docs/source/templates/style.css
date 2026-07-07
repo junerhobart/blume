@@ -81,7 +81,7 @@ html {
 	border-image: linear-gradient(rgba(80, 0, 255, 0.31), rgba(40, 0, 127, 0.31)) 1;
 }
 
-/* Blume — moss/grass palette; forest-tinted scrims, soft borders */
+/* Blume - moss/grass palette; forest-tinted scrims, soft borders */
 :root {
 	--mc-tile: 128px;
 	--mc-border: rgba(22, 30, 18, 0.45);
@@ -417,7 +417,7 @@ button.bg-block-dirt::after {
 	content: none !important;
 }
 
-/* Microanimations — instant/snappy like MC menus (no smooth easing) */
+/* Microanimations - instant/snappy like MC menus (no smooth easing) */
 @keyframes mc-blink-in {
 	from {
 		opacity: 0;

@@ -20,33 +20,21 @@ fetch 'https://download.geysermc.org/v2/projects/floodgate/versions/latest/build
 (cd "$ROOT" && mvn -q clean package)
 cp "$ROOT/target/Blume-0.4.jar" plugins/Blume.jar
 
-PACK_PORT=8765
-PACK_SHA1=$(shasum -a 1 "$ROOT/docs/blume-pack.zip" | awk '{print $1}')
-PACK_URL="http://127.0.0.1:${PACK_PORT}/blume-pack.zip"
-BEDROCK_PACK_URL="http://127.0.0.1:${PACK_PORT}/blume-bedrock-pack.zip"
-
-# ponytail: single-process static server for local dev; production uses GitHub Pages URL in config
-if lsof -ti:"$PACK_PORT" >/dev/null 2>&1; then
-  kill "$(lsof -ti:"$PACK_PORT")" 2>/dev/null || true
-fi
-(cd "$ROOT/docs" && python3 -m http.server "$PACK_PORT" --bind 127.0.0.1 >/dev/null 2>&1 &)
-
 mkdir -p plugins/Blume
 CFG="plugins/Blume/config.yml"
 DEFAULT_CFG="$ROOT/target/classes/config.yml"
 if [ ! -f "$CFG" ]; then
   cp "$DEFAULT_CFG" "$CFG"
 fi
-if ! grep -q '^  bedrock:' "$CFG"; then
-  sed -i '' "/^  prompt:/a\\
-  bedrock:\\
-    enabled: true\\
-    url: \"${BEDROCK_PACK_URL}\"
+if ! grep -q '^  builtin-host:' "$CFG"; then
+  sed -i '' "/^  enabled:/a\\
+  url: \"https://junerhobart.github.io/blume/blume-pack.zip\"\\
+  builtin-host: true\\
+  host: \"127.0.0.1\"
 " "$CFG"
 fi
-sed -i '' "s|^  url:.*|  url: \"${PACK_URL}\"|" "$CFG"
-sed -i '' "s|^  sha1:.*|  sha1: \"${PACK_SHA1}\"|" "$CFG"
-sed -i '' "s|^    url:.*|    url: \"${BEDROCK_PACK_URL}\"|" "$CFG"
+sed -i '' 's/^  builtin-host:.*/  builtin-host: true/' "$CFG"
+sed -i '' 's/^  host:.*/  host: "127.0.0.1"/' "$CFG"
 
 GEYSER_CFG="plugins/Geyser-Spigot/config.yml"
 patch_geyser_config() {

@@ -1,4 +1,4 @@
-// Adapted from Vane (MIT) — https://github.com/oddlama/vane
+// Adapted from Vane (MIT) - https://github.com/oddlama/vane
 // Copyright (c) 2020 oddlama
 
 package io.blume.qol.creeper;
