@@ -81,7 +81,7 @@ public final class VouchCommand {
 
         if (luckPerms.isConfigured() && !luckPerms.isActive()) {
             sender.sendMessage(Component.text(
-                "LuckPerms group promotion is not active — check server log or admin.luckperms in config.",
+                "LuckPerms group promotion is not active - check server log or admin.luckperms in config.",
                 NamedTextColor.YELLOW
             ));
         }

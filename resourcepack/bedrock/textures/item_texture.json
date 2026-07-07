@@ -3,13 +3,13 @@
   "texture_name": "atlas.items",
   "texture_data": {
     "blume:carrot_seeds": {
-      "textures": "textures/items/carrot_seeds"
+      "textures": ["textures/items/carrot_seeds"]
     },
     "blume:potato_seeds": {
-      "textures": "textures/items/potato_seeds"
+      "textures": ["textures/items/potato_seeds"]
     },
     "blume:mixed_seeds": {
-      "textures": "textures/items/mixed_seeds"
+      "textures": ["textures/items/mixed_seeds"]
     }
   }
 }

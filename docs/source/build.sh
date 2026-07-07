@@ -6,7 +6,7 @@ function die() { echo "\x1b[1;31merror:\x1b[m $*" >&2; exit 1; }
 	|| die "Missing docs/content.toml"
 
 [[ -d ../content ]] \
-	|| die "Missing docs/content/ — edit feature markdown there"
+	|| die "Missing docs/content/ - edit feature markdown there"
 
 JAR_ARGS=()
 if [[ -e minecraft-client.jar ]]; then

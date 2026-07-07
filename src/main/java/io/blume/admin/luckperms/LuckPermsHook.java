@@ -49,7 +49,7 @@ public final class LuckPermsHook {
             Class.forName(LP_PROVIDER_CLASS);
             promoter = new LuckPermsBridge(plugin);
             plugin.getLogger().info(
-                "[Blume] LuckPerms integration active — vouched players join group '" + group + "'."
+                "[Blume] LuckPerms integration active - vouched players join group '" + group + "'."
             );
         } catch (LinkageError | Exception e) {
             plugin.getLogger().log(

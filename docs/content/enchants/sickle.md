@@ -1,5 +1,5 @@
 ---
-title: Sickle I–III
+title: Sickle I-III
 icon: "minecraft:golden_hoe"
 enabled_by_default: true
 ---

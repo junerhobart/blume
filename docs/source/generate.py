@@ -516,7 +516,7 @@ def generate_docs() -> None:
     with open(context.build_path / "index.html", "w") as f:
         f.write(index_content)
 
-# Block palette #75501 — https://www.blockpalettes.com/palette/75501
+# Block palette #75501 - https://www.blockpalettes.com/palette/75501
 BLOCK_TEXTURES = [
     "assets/minecraft/textures/block/moss_block.png",
     "assets/minecraft/textures/block/stripped_spruce_log.png",

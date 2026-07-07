@@ -31,7 +31,7 @@ public final class EnchantsModule {
         BlumeEnchantments.resolve();
         if (!BlumeEnchantments.isResolved()) {
             plugin.getLogger().warning(
-                "Custom enchantments missing from registry — restart the server after updating Blume."
+                "Custom enchantments missing from registry - restart the server after updating Blume."
             );
         }
         if (!config.isEnabled()) {

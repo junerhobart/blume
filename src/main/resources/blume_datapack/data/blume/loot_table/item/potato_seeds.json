@@ -13,7 +13,7 @@
               "components": {
                 "minecraft:item_model": "blume:potato_seeds",
                 "minecraft:item_name": {
-                  "translate": "item.blume.potato_seeds",
+                  "text": "Potato Seeds",
                   "italic": false
                 }
               }
