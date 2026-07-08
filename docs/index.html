@@ -34,7 +34,7 @@
 				</div>
 			</section>
 			<div class="category-block mt-16 mb-6" id="category-qol">
-	<h2 class="category-heading font-minecraft text-2xl md:text-3xl mc-text-heading px-5 py-3.5 bg-block-dirt-path mc-border"><span class="mc-layer-content">Quality of Life</span></h2>
+	<h2 class="category-heading font-minecraft text-2xl md:text-3xl mc-text-heading px-5 py-3.5 bg-block-{{ category.banner }} mc-border"><span class="mc-layer-content">Quality of Life</span></h2>
 </div>
 <section class="feature-list">
 	<article class="feature-item">
@@ -52,6 +52,7 @@
 	<div id="body-feature-qol--double-doors" class="mc-accordion-panel">
 		<div class="bg-block-grass mc-border border-t-0">
 			<div class="feature-body">
+				<figure class="feature-video"><video class="feature-video-player w-full mc-border" controls playsinline preload="metadata"><source src="media/double-doors.mp4" type="video/mp4"></video><figcaption class="sr-only">Demo: double doors</figcaption></figure>
 				<div class="feature-prose prose prose-invert max-w-none font-minecraft"><p>Double doors open and close together, click or redstone one side and the matching half follows.</p></div>
 			</div>
 		</div>
@@ -73,6 +74,7 @@
 	<div id="body-feature-qol--desire-paths" class="mc-accordion-panel">
 		<div class="bg-block-grass mc-border border-t-0">
 			<div class="feature-body">
+				<figure class="feature-video"><video class="feature-video-player w-full mc-border" controls playsinline preload="metadata"><source src="media/desire-paths.mp4" type="video/mp4"></video><figcaption class="sr-only">Demo: desire paths</figcaption></figure>
 				<div class="feature-prose prose prose-invert max-w-none font-minecraft"><p>Paths are naturally formed where players walk.</p></div>
 			</div>
 		</div>
@@ -136,6 +138,7 @@
 	<div id="body-feature-qol--harvest-replant" class="mc-accordion-panel">
 		<div class="bg-block-grass mc-border border-t-0">
 			<div class="feature-body">
+				<figure class="feature-video"><video class="feature-video-player w-full mc-border" controls playsinline preload="metadata"><source src="media/harvest-replant.mp4" type="video/mp4"></video><figcaption class="sr-only">Demo: harvest replant</figcaption></figure>
 				<div class="feature-prose prose prose-invert max-w-none font-minecraft"><p>Right-click a fully grown crop to harvest and replant in one action.</p></div>
 			</div>
 		</div>
@@ -157,6 +160,7 @@
 	<div id="body-feature-qol--path-speed" class="mc-accordion-panel">
 		<div class="bg-block-grass mc-border border-t-0">
 			<div class="feature-body">
+				<figure class="feature-video"><video class="feature-video-player w-full mc-border" controls playsinline preload="metadata"><source src="media/path-speed.mp4" type="video/mp4"></video><figcaption class="sr-only">Demo: path speed</figcaption></figure>
 				<div class="feature-prose prose prose-invert max-w-none font-minecraft"><p>Built paths feel faster: dirt, gravel, and coarse dirt give a small movement boost; dirt paths are faster still.</p></div>
 			</div>
 		</div>
@@ -178,6 +182,7 @@
 	<div id="body-feature-qol--creeper-rebuild" class="mc-accordion-panel">
 		<div class="bg-block-grass mc-border border-t-0">
 			<div class="feature-body">
+				<figure class="feature-video"><video class="feature-video-player w-full mc-border" controls playsinline preload="metadata"><source src="media/creeper-rebuild.mp4" type="video/mp4"></video><figcaption class="sr-only">Demo: creeper rebuild</figcaption></figure>
 				<div class="feature-prose prose prose-invert max-w-none font-minecraft"><p>Explosions still happen, but destroyed blocks rebuild over time with a particle effect instead of leaving permanent craters (adapted from <a href="https://github.com/oddlama/vane">vane</a>).</p></div>
 			</div>
 		</div>
@@ -187,7 +192,7 @@
 </section>
 
 <div class="category-block mt-16 mb-6" id="category-ecology">
-	<h2 class="category-heading font-minecraft text-2xl md:text-3xl mc-text-heading px-5 py-3.5 bg-block-farmland mc-border"><span class="mc-layer-content">Ecology</span></h2>
+	<h2 class="category-heading font-minecraft text-2xl md:text-3xl mc-text-heading px-5 py-3.5 bg-block-{{ category.banner }} mc-border"><span class="mc-layer-content">Ecology</span></h2>
 </div>
 <section class="feature-list">
 	<article class="feature-item">
@@ -195,7 +200,7 @@
 		<button type="button" class="feature-toggle mc-interactive relative flex justify-between items-center w-full text-left text-xl font-minecraft font-normal mc-text bg-block-grass mc-border mc-hover  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent px-4 py-3.5" aria-expanded="false" aria-controls="body-feature-ecology--mixed-seeds">
 			<span class="relative z-10 flex items-center gap-3 min-w-0 flex-1">
 				<span class="feature-icon relative w-8 h-8 min-w-[2rem] min-h-[2rem] block">
-					<img class="absolute inset-0 object-cover is-pixelated w-full h-full" src="assets/blume/textures/item/mixed_seeds.png" alt="">
+					<img class="absolute inset-0 object-cover is-pixelated w-full h-full" src="assets/minecraft/textures/item/barrier.png" alt="">
 				</span>
 				<span class="truncate">Mixed Seeds</span>
 			</span>
@@ -216,7 +221,7 @@
 		<button type="button" class="feature-toggle mc-interactive relative flex justify-between items-center w-full text-left text-xl font-minecraft font-normal mc-text bg-block-grass mc-border mc-hover  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent px-4 py-3.5" aria-expanded="false" aria-controls="body-feature-ecology--carrot-seeds">
 			<span class="relative z-10 flex items-center gap-3 min-w-0 flex-1">
 				<span class="feature-icon relative w-8 h-8 min-w-[2rem] min-h-[2rem] block">
-					<img class="absolute inset-0 object-cover is-pixelated w-full h-full" src="assets/blume/textures/item/carrot_seeds.png" alt="">
+					<img class="absolute inset-0 object-cover is-pixelated w-full h-full" src="assets/minecraft/textures/item/barrier.png" alt="">
 				</span>
 				<span class="truncate">Carrot Seeds</span>
 			</span>
@@ -237,7 +242,7 @@
 		<button type="button" class="feature-toggle mc-interactive relative flex justify-between items-center w-full text-left text-xl font-minecraft font-normal mc-text bg-block-grass mc-border mc-hover  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent px-4 py-3.5" aria-expanded="false" aria-controls="body-feature-ecology--potato-seeds">
 			<span class="relative z-10 flex items-center gap-3 min-w-0 flex-1">
 				<span class="feature-icon relative w-8 h-8 min-w-[2rem] min-h-[2rem] block">
-					<img class="absolute inset-0 object-cover is-pixelated w-full h-full" src="assets/blume/textures/item/potato_seeds.png" alt="">
+					<img class="absolute inset-0 object-cover is-pixelated w-full h-full" src="assets/minecraft/textures/item/barrier.png" alt="">
 				</span>
 				<span class="truncate">Potato Seeds</span>
 			</span>
@@ -340,7 +345,7 @@
 </section>
 
 <div class="category-block mt-16 mb-6" id="category-enchants">
-	<h2 class="category-heading font-minecraft text-2xl md:text-3xl mc-text-heading px-5 py-3.5 bg-block-glow-berries mc-border"><span class="mc-layer-content">Enchantments</span></h2>
+	<h2 class="category-heading font-minecraft text-2xl md:text-3xl mc-text-heading px-5 py-3.5 bg-block-{{ category.banner }} mc-border"><span class="mc-layer-content">Enchantments</span></h2>
 </div>
 <section class="feature-list">
 	<article class="feature-item">
@@ -358,6 +363,7 @@
 	<div id="body-feature-enchants--auto-smelt" class="mc-accordion-panel">
 		<div class="bg-block-grass mc-border border-t-0">
 			<div class="feature-body">
+				<figure class="feature-video"><video class="feature-video-player w-full mc-border" controls playsinline preload="metadata"><source src="media/auto-smelt.mp4" type="video/mp4"></video><figcaption class="sr-only">Demo: auto smelt</figcaption></figure>
 				<div class="feature-prose prose prose-invert max-w-none font-minecraft"><p>Ores drop smelted when mined.</p></div>
 			</div>
 		</div>
@@ -379,6 +385,7 @@
 	<div id="body-feature-enchants--veinminer" class="mc-accordion-panel">
 		<div class="bg-block-grass mc-border border-t-0">
 			<div class="feature-body">
+				<figure class="feature-video"><video class="feature-video-player w-full mc-border" controls playsinline preload="metadata"><source src="media/veinminer.mp4" type="video/mp4"></video><figcaption class="sr-only">Demo: veinminer</figcaption></figure>
 				<div class="feature-prose prose prose-invert max-w-none font-minecraft"><p>Mine an ore block and connected matching ores break in a chain.</p></div>
 			</div>
 		</div>
@@ -400,6 +407,7 @@
 	<div id="body-feature-enchants--timber" class="mc-accordion-panel">
 		<div class="bg-block-grass mc-border border-t-0">
 			<div class="feature-body">
+				<figure class="feature-video"><video class="feature-video-player w-full mc-border" controls playsinline preload="metadata"><source src="media/timber.mp4" type="video/mp4"></video><figcaption class="sr-only">Demo: timber</figcaption></figure>
 				<div class="feature-prose prose prose-invert max-w-none font-minecraft"><p>Break one log and it will chop the whole tree down and replant the sapling.</p></div>
 			</div>
 		</div>
@@ -421,6 +429,7 @@
 	<div id="body-feature-enchants--sickle" class="mc-accordion-panel">
 		<div class="bg-block-grass mc-border border-t-0">
 			<div class="feature-body">
+				<figure class="feature-video"><video class="feature-video-player w-full mc-border" controls playsinline preload="metadata"><source src="media/sickle.mp4" type="video/mp4"></video><figcaption class="sr-only">Demo: sickle</figcaption></figure>
 				<div class="feature-prose prose prose-invert max-w-none font-minecraft"><p>Harvest crops in an area around you, higher enchant levels reach further.</p></div>
 			</div>
 		</div>
@@ -451,7 +460,7 @@
 </section>
 
 <div class="category-block mt-16 mb-6" id="category-admin">
-	<h2 class="category-heading font-minecraft text-2xl md:text-3xl mc-text-heading px-5 py-3.5 bg-block-flowers mc-border"><span class="mc-layer-content">Administration</span></h2>
+	<h2 class="category-heading font-minecraft text-2xl md:text-3xl mc-text-heading px-5 py-3.5 bg-block-{{ category.banner }} mc-border"><span class="mc-layer-content">Administration</span></h2>
 </div>
 <section class="feature-list">
 	<article class="feature-item">
