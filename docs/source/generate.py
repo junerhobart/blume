@@ -263,10 +263,28 @@ def render_spawn_egg(key: str, base_rgb: tuple[int, int, int], spot_rgb: tuple[i
     _write_png_rgba(out, base_w, base_h, composite)
     return icon
 
+def _committed_minecraft_icon(key: str) -> str | None:
+    for candidate in (
+        f"assets/minecraft/textures/item/{key}.png",
+        f"assets/minecraft/blocks/{key}.png",
+        f"assets/minecraft/textures/block/{key}.png",
+        f"assets/minecraft_special/{key}.png",
+    ):
+        if (context.assets_path / candidate.removeprefix("assets/")).exists():
+            return candidate
+    return None
+
 def minecraft_asset_icon(key: str) -> str:
-    # Don't load again if already known
     if key in context.loaded_minecraft_asset_icons:
         return context.loaded_minecraft_asset_icons[key]
+
+    if context.client_jar is None:
+        icon = _committed_minecraft_icon(key)
+        if icon is None:
+            icon = f"assets/minecraft/textures/item/barrier.png"
+            print(f"\x1b[1;33mwarning:\x1b[m missing committed icon for minecraft:{key}")
+        context.loaded_minecraft_asset_icons[key] = icon
+        return icon
 
     icon = None
     item_model = None
@@ -322,6 +340,8 @@ def item_to_icon(item: str) -> str:
         return f"assets/minecraft_special/leather_chestplate.png"
     elif namespace == "minecraft":
         return minecraft_asset_icon(key)
+    elif namespace == "blume":
+        return f"assets/blume/textures/item/{key}.png"
     elif namespace.startswith("vane"):
         if resource_key == "vane_trifles:north_compass":
             context.required_project_assets.add(("vane-trifles", "items/north_compass_16.png"))
@@ -579,16 +599,20 @@ def collect_trapdoor_sounds() -> None:
     for asset in TRAPDOOR_SOUNDS:
         out = context.assets_path / asset.removeprefix("assets/")
         out.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            out.write_bytes(context.client_jar.read(asset))
-            continue
-        except KeyError:
-            pass
+        if context.client_jar is not None:
+            try:
+                out.write_bytes(context.client_jar.read(asset))
+                continue
+            except KeyError:
+                pass
         src = bundled / asset.removeprefix("assets/")
         if src.exists():
             shutil.copy2(src, out)
         else:
             print(f"\x1b[1;33mwarning:\x1b[m missing trapdoor sound: {asset}")
+
+def collect_static_assets() -> None:
+    collect_trapdoor_sounds()
 
 def upscaled_tile_path(asset: str) -> Path:
     name = Path(asset).name
@@ -791,7 +815,6 @@ def collect_assets() -> None:
         collect_jar_asset(asset)
 
     collect_block_textures()
-    collect_trapdoor_sounds()
 
     print(f"Collecting {len(context.required_project_assets)} required assets from this project...")
     project_root = Path(__file__).resolve().parent.parent.parent
@@ -856,10 +879,12 @@ def main():
             context.client_jar = client_jar
             generate_docs()
             collect_assets()
+            collect_media()
+            collect_static_assets()
     else:
         generate_docs()
-
-    collect_media()
+        collect_media()
+        collect_static_assets()
 
     # Ensure that all content documents are included as a safety check
     used = set(f for cat in context.content_settings["categories"] for f in cat["content"])
