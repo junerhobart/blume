@@ -21,9 +21,8 @@
 [x] make carrot seed texture
 [x] make potato seed texture
 [x] make mixed seed texture
-[ ] grass spread like a weed like it will spread around and you need to stay ontop of it or it will get into your garden if it is touching grass blocks it will like go in to empty farmland, sourrount it in a block like logs like the villager farms and you are good. a rare chance to even have grass kill an actual crop 5%,
-[ ] make chickens eat undeveloped wheat, like fresh wheat seeds to incourage fencing in garden
 [ ] particle feedback for happy animals
+[ ] make grass grow a bit slower and work more like a weed but not grow in real time, like crops kinda slow
 
 ## enchants
 
@@ -45,5 +44,5 @@
 [x] make website
 [x] make icon
 [x] modrinth page
-    [ ] get images for modrinth page
+    [x] get images for modrinth page
 [x] github actions

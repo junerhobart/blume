@@ -10,8 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
-
 public final class CommandBroadcastListener implements Listener {
 
     private final AdminConfig config;
@@ -28,13 +26,7 @@ public final class CommandBroadcastListener implements Listener {
         }
 
         String message = event.getMessage().trim();
-        if (message.isEmpty() || message.charAt(0) != '/') {
-            return;
-        }
-
-        String commandLine = message.substring(1);
-        String root = commandLine.split("\\s+", 2)[0].toLowerCase(Locale.ROOT);
-        if (config.commandBroadcastExcluded().contains(root)) {
+        if (!config.shouldBroadcastCommand(message)) {
             return;
         }
 
