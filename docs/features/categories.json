@@ -1,0 +1,52 @@
+[
+  {
+    "id": "qol",
+    "title": "Quality of Life",
+    "banner": "dirt-path",
+    "features": [
+      "double-doors",
+      "desire-paths",
+      "death-drops",
+      "anvil-limit",
+      "harvest-replant",
+      "path-speed",
+      "creeper-rebuild"
+    ]
+  },
+  {
+    "id": "ecology",
+    "title": "Ecology",
+    "banner": "farmland",
+    "features": [
+      "mixed-seeds",
+      "carrot-seeds",
+      "potato-seeds",
+      "wild-crops",
+      "natural-grass",
+      "pollination",
+      "pasture-welfare"
+    ]
+  },
+  {
+    "id": "enchants",
+    "title": "Enchantments",
+    "banner": "glow-berries",
+    "features": [
+      "auto-smelt",
+      "veinminer",
+      "timber",
+      "sickle",
+      "unbreakable"
+    ]
+  },
+  {
+    "id": "admin",
+    "title": "Administration",
+    "banner": "flowers",
+    "features": [
+      "command-broadcast",
+      "graylist",
+      "vouch"
+    ]
+  }
+]

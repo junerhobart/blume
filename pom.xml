@@ -104,19 +104,35 @@
                         </goals>
                         <configuration>
                             <target>
-                                <property name="pack.zip" location="${project.basedir}/docs/blume-pack.zip"/>
+                                <property name="pack.zip" location="${project.build.directory}/blume-pack.zip"/>
+                                <property name="java.stage"
+                                          location="${project.build.directory}/java-pack-stage"/>
                                 <property name="bedrock.stage"
                                           location="${project.build.directory}/bedrock-pack-stage"/>
                                 <property name="bedrock.zip"
-                                          location="${project.basedir}/docs/blume-bedrock-pack.zip"/>
+                                          location="${project.build.directory}/blume-bedrock-pack.zip"/>
                                 <property name="geyser.mappings"
-                                          location="${project.basedir}/docs/blume-geyser-mappings.json"/>
-                                <mkdir dir="${project.basedir}/docs"/>
-                                <zip destfile="${pack.zip}"
-                                     basedir="${project.basedir}/resourcepack/java"/>
+                                          location="${project.build.directory}/blume-geyser-mappings.json"/>
+                                <property name="docs.textures"
+                                          location="${project.basedir}/docs/assets/textures"/>
+                                <delete dir="${java.stage}" quiet="true"/>
+                                <copy todir="${java.stage}">
+                                    <fileset dir="${project.basedir}/resourcepack/java"/>
+                                </copy>
+                                <mkdir dir="${java.stage}/assets/blume/textures/item"/>
+                                <copy todir="${java.stage}/assets/blume/textures/item" overwrite="true">
+                                    <fileset dir="${docs.textures}">
+                                        <include name="*.png"/>
+                                    </fileset>
+                                </copy>
+                                <copy file="${project.basedir}/docs/assets/icon.png"
+                                      tofile="${java.stage}/pack.png"
+                                      overwrite="true"
+                                      failonerror="false"/>
+                                <zip destfile="${pack.zip}" basedir="${java.stage}"/>
                                 <copy file="${pack.zip}"
                                       tofile="${project.build.directory}/classes/java-pack.zip"/>
-                                <echo message="Resource pack: docs/blume-pack.zip"/>
+                                <echo message="Resource pack: target/blume-pack.zip"/>
                                 <delete dir="${bedrock.stage}" quiet="true"/>
                                 <mkdir dir="${bedrock.stage}/textures/items"/>
                                 <copy todir="${bedrock.stage}">
@@ -125,7 +141,7 @@
                                     </fileset>
                                 </copy>
                                 <copy todir="${bedrock.stage}/textures/items">
-                                    <fileset dir="${project.basedir}/resourcepack/java/assets/blume/textures/item">
+                                    <fileset dir="${docs.textures}">
                                         <include name="*.png"/>
                                     </fileset>
                                 </copy>
@@ -136,8 +152,8 @@
                                       tofile="${project.build.directory}/classes/blume-geyser-mappings.json"/>
                                 <copy file="${project.basedir}/resourcepack/bedrock/geyser_items.json"
                                       tofile="${geyser.mappings}"/>
-                                <echo message="Bedrock pack: docs/blume-bedrock-pack.zip"/>
-                                <echo message="Geyser mappings: docs/blume-geyser-mappings.json"/>
+                                <echo message="Bedrock pack: target/blume-bedrock-pack.zip"/>
+                                <echo message="Geyser mappings: target/blume-geyser-mappings.json"/>
                             </target>
                         </configuration>
                     </execution>

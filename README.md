@@ -10,6 +10,25 @@ Blume is a widely compatible server-side plugin with many vanilla+ features, inc
 
 Refer to our [website](https://junerhobart.github.io/blume/) for a more comprehensive list.
 
+## Gallery
+
+<p align="center">
+  <img src="docs/assets/gifs/auto-smelt.gif" width="32%" />
+  <img src="docs/assets/gifs/creeper-rebuild.gif" width="32%" />
+  <img src="docs/assets/gifs/desire-paths.gif" width="32%" />
+</p>
+<p align="center">
+  <img src="docs/assets/gifs/double-doors.gif" width="32%" />
+  <img src="docs/assets/gifs/harvest-replant.gif" width="32%" />
+  <img src="docs/assets/gifs/path-speed.gif" width="32%" />
+</p>
+<p align="center">
+  <img src="docs/assets/gifs/sickle.gif" width="32%" />
+  <img src="docs/assets/gifs/timber.gif" width="32%" />
+  <img src="docs/assets/gifs/veinminer.gif" width="32%" />
+</p>
+
+
 ## Credit
 
 Blume is heavily inspired by [Vane](https://github.com/oddlama/vane) and [Ecological](https://www.curseforge.com/minecraft/mc-mods/ecological). Some features and code are used directly, with permission or under their licenses.

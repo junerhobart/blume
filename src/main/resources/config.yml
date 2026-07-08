@@ -1,6 +1,6 @@
 resource-pack:
   enabled: true
-  url: "https://junerhobart.github.io/blume/blume-pack.zip"
+  url: "https://github.com/junerhobart/blume/releases/download/v${project.version}/blume-pack.zip"
   builtin-host: false
   host: ""
   port: 8765
@@ -11,7 +11,7 @@ resource-pack:
 
 updates:
   check: true
-  modrinth-slug: ""
+  modrinth-slug: "blume"
   github-repo: "junerhobart/blume"
 
 admin:

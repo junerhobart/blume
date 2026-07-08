@@ -37,7 +37,7 @@ ticks-per:
   water-spawns: 1
   water-ambient-spawns: 1
   water-underground-creature-spawns: 1
-  axolotl-spawns: 1sod
+  axolotl-spawns: 1
 worlds:
   world:
     generator: Terra:OVERWORLD

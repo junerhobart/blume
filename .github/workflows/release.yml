@@ -51,7 +51,39 @@ jobs:
         with:
           body_path: changelog.txt
           generate_release_notes: false
-          files: target/Blume-${{ steps.version.outputs.value }}.jar
+          files: |
+            target/Blume-${{ steps.version.outputs.value }}.jar
+            target/blume-pack.zip
+            target/blume-bedrock-pack.zip
+            target/blume-geyser-mappings.json
+
+      - name: Sync README to Modrinth body
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
+        run: |
+          BODY_JSON=$(jq -n --rawfile body README.md '{body: $body}')
+          curl -fsSL -X PATCH "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}" \
+            -H "Authorization: ${MODRINTH_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "$BODY_JSON"
+
+      - name: Sync GitHub About to Modrinth description
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SUMMARY=$(gh api "repos/${GITHUB_REPOSITORY}" --jq .description | head -c 256)
+          if [ -z "$SUMMARY" ]; then
+            echo "GitHub repo description is empty; set About in repo settings before syncing"
+            exit 1
+          fi
+
+          curl -fsSL -X PATCH "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}" \
+            -H "Authorization: ${MODRINTH_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg d "$SUMMARY" '{description: $d}')"
 
       - name: Publish to Modrinth
         env:

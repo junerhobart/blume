@@ -10,7 +10,8 @@ public final class BlumeConfig {
     private static final String DEFAULT_PROMPT =
         "<green>Blume</green> uses a resource pack for custom items. Please accept.";
     private static final int DEFAULT_PACK_PORT = 8765;
-    private static final String DEFAULT_PACK_URL = "https://junerhobart.github.io/blume/blume-pack.zip";
+    private static final String DEFAULT_PACK_URL =
+        "https://github.com/junerhobart/blume/releases/download/v0.0.0/blume-pack.zip";
 
     private final boolean resourcePackEnabled;
     private final String resourcePackUrl;

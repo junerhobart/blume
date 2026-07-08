@@ -8,19 +8,22 @@ cd blume
 mvn package
 ```
 
-The plugin jar is written to `target/Blume-<version>.jar`.
+The plugin jar is written to `target/Blume-<version>.jar`. Resource packs are built to `target/` and embedded in the jar. Releases attach packs to Modrinth.
 
-A build also regenerates `docs/blume-pack.zip` from `resourcepack/java/`, `docs/blume-bedrock-pack.zip` from `resourcepack/bedrock/` (seed PNGs copied from the Java pack at build time), and `docs/blume-geyser-mappings.json` from `resourcepack/bedrock/geyser_items.json`.
+Custom item textures: `docs/assets/textures/`
 
 ## Website
 
+Static files in `docs/`. No build step.
+
 ```bash
-cd docs/source
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-npm install
-./build.sh
-cd .. && python3 -m http.server 8765
+cd docs
+python3 -m http.server 8765
 ```
+
+- Feature pages: `docs/features/{category}/*.md`
+- Demo videos: `docs/assets/videos/*.mp4`
+- Images: `docs/assets/`
 
 # Local testing
 
@@ -33,7 +36,7 @@ Note: you can also run `'/Users/junehobart/Projects/blume/run/scripts/purge.sh'`
 
 - Keep names clear and diffs small.
 - Avoid unrelated refactors in the same PR.
-- Do not commit generated files unless the project already tracks them (for example `docs/blume-pack.zip`).
+- Do not commit generated files unless the project already tracks them.
 - 'AI assisted' or 'vibecoded' commits are permitted, but I better not see a +200k line commit.
 
 # License

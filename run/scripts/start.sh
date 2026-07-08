@@ -28,7 +28,6 @@ if [ ! -f "$CFG" ]; then
 fi
 if ! grep -q '^  builtin-host:' "$CFG"; then
   sed -i '' "/^  enabled:/a\\
-  url: \"https://junerhobart.github.io/blume/blume-pack.zip\"\\
   builtin-host: true\\
   host: \"127.0.0.1\"
 " "$CFG"
