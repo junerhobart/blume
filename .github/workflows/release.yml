@@ -26,17 +26,8 @@ jobs:
           java-version: "21"
           cache: maven
 
-      - name: Validate pom.xml version matches tag
-        run: |
-          VERSION="${{ steps.version.outputs.value }}"
-          POM_VERSION=$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
-          if [ "$POM_VERSION" != "$VERSION" ]; then
-            echo "pom.xml version ($POM_VERSION) does not match tag ($VERSION)"
-            exit 1
-          fi
-
       - name: Build
-        run: mvn -B package
+        run: mvn -B -Drevision=${{ steps.version.outputs.value }} package
 
       - name: Changelog since last tag
         run: |
