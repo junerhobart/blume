@@ -7,11 +7,161 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - run: sh scripts/build.sh -B package
+
+      - name: Build plugin
+        run: sh scripts/build.sh -B package -DskipTests
+
+      - name: Artifact contract
+        run: |
+          set -eu
+          version=$(sh scripts/build.sh -q help:evaluate -Dexpression=project.version -DforceStdout)
+          jar="target/Blume-${version}.jar"
+
+          test -f "$jar"
+          test -f target/blume-pack.zip
+          test -f target/blume-bedrock-pack.zip
+          test -f target/blume-geyser-mappings.json
+
+          jar tf "$jar" | grep -q 'java-pack.zip'
+          jar tf "$jar" | grep -q 'bedrock-pack.zip'
+          jar tf "$jar" | grep -q 'blume-geyser-mappings.json'
+          jar tf "$jar" | grep -q 'blume_datapack/pack.mcmeta'
+          jar tf "$jar" | grep -q 'paper-plugin.yml'
+
+          unzip -l target/blume-pack.zip | grep -q 'pack.mcmeta'
+          unzip -l target/blume-pack.zip | grep -q 'carrot_seeds'
+
+          jq . resourcepack/bedrock/geyser_items.json >/dev/null
+          for f in src/main/resources/blume_datapack/data/blume/loot_table/item/*.json; do
+            jq . "$f" >/dev/null
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blume-jar
+          path: target/Blume-*.jar
+          retention-days: 1
+
+  website:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docs static checks
+        run: |
+          set -eu
+          test -f docs/index.html
+          test -f docs/css/style.css
+          test -f docs/js/site.js
+          test -f docs/js/accordion.js
+          test -f docs/assets/icon.png
+          test -f docs/favicon.ico
+
+          jq -e 'length > 0' docs/features/categories.json >/dev/null
+
+          jq -r '.[] | "\(.id) \(.banner) \(.features[])"' docs/features/categories.json | while read -r cat banner slug; do
+            test -f "docs/features/${cat}/${slug}.md"
+            test -f "docs/assets/minecraft/textures/block/tiles/${banner}.png"
+
+            icon=$(awk '/^---$/{n++; next} n==1 && /^icon:/{sub(/^icon:[[:space:]]*/,""); gsub(/["'\'']/, ""); print; exit}' "docs/features/${cat}/${slug}.md")
+            case "$icon" in
+              minecraft:*)
+                test -f "docs/assets/minecraft/textures/item/${icon#minecraft:}.png"
+                ;;
+              blume:*)
+                test -f "docs/assets/textures/${icon#blume:}.png"
+                ;;
+              *)
+                echo "missing or unknown icon in ${cat}/${slug}.md: ${icon}"
+                exit 1
+                ;;
+            esac
+          done
+
+      - name: Docs HTTP smoke
+        run: |
+          set -eu
+          python3 -m http.server 4173 --directory docs &
+          web_pid=$!
+          trap 'kill "$web_pid" 2>/dev/null || true' EXIT
+          sleep 1
+
+          curl -fsS http://127.0.0.1:4173/ | grep -q 'id="features"'
+          curl -fsS http://127.0.0.1:4173/css/style.css >/dev/null
+          curl -fsS http://127.0.0.1:4173/js/site.js >/dev/null
+          curl -fsS http://127.0.0.1:4173/features/categories.json >/dev/null
+
+          jq -r '.[] | "\(.id) \(.features[])"' docs/features/categories.json | while read -r cat slug; do
+            curl -fsS "http://127.0.0.1:4173/features/${cat}/${slug}.md" >/dev/null
+          done
+
+  smoke:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: blume-jar
+          path: jar
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Plugin load smoke
+        run: |
+          set -eu
+          root="$PWD"
+          work="$root/.ci-work"
+          rm -rf "$work"
+          mkdir -p "$work/plugins/Blume"
+
+          curl -fsSL -o "$work/paper.jar" \
+            'https://fill-data.papermc.io/v1/objects/8de7c52c3b02403503d16fac58003f1efef7dd7a0256786843927fa92ee57f1e/paper-1.21.8-60.jar'
+
+          cp jar/Blume-*.jar "$work/plugins/Blume.jar"
+
+          unzip -p "$work/plugins/Blume.jar" config.yml > "$work/plugins/Blume/config.yml"
+          sed -i 's/^  builtin-host:.*/  builtin-host: true/' "$work/plugins/Blume/config.yml"
+          sed -i 's/^  check:.*/  check: false/' "$work/plugins/Blume/config.yml"
+          sed -i 's/^  host:.*/  host: "127.0.0.1"/' "$work/plugins/Blume/config.yml"
+
+          printf '%s\n' 'eula=true' > "$work/eula.txt"
+          printf '%s\n' \
+            'online-mode=false' \
+            'spawn-protection=0' \
+            'server-port=25566' \
+            > "$work/server.properties"
+
+          cd "$work"
+          java -Xms512M -Xmx1G -jar paper.jar --nogui > console.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+
+          for _ in $(seq 1 60); do
+            if grep -q 'Done (' console.log 2>/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+
+          grep -q 'Done (' console.log
+          grep -qi 'blume' console.log
+          ! grep -E 'SEVERE.*Blume|Could not load.*Blume|Error enabling plugin Blume|Disabling Blume' console.log \
+            || { grep -E 'SEVERE.*Blume|Could not load.*Blume|Error enabling plugin Blume|Disabling Blume' console.log; exit 1; }
+
+          curl -fsS http://127.0.0.1:8765/blume-pack.zip | head -c 2 | grep -q '^PK'
