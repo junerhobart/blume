@@ -3,3 +3,8 @@
 /index.html
 /css/
 /media/
+
+# Maven outputs at docs root (see root .gitignore)
+/blume-pack.zip
+/blume-bedrock-pack.zip
+/blume-geyser-mappings.json
