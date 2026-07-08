@@ -6,9 +6,13 @@ target/
 run/*
 !run/scripts/
 !run/scripts/**
-!run/server.properties
-!run/bukkit.yml
-!run/ops.json
+!bukkit.yml
+!ops.json
+!server.properties
+
+docs/blume-pack.zip
+docs/blume-bedrock-pack.zip
+docs/blume-geyser-mappings.json
 
 .cursor/
 .cursorignore

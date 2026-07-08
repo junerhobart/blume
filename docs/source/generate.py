@@ -29,6 +29,7 @@ class Feature:
 class Context:
     build_path: Path = Path("build")
     assets_path: Path = Path("build/assets")
+    content_dir: Path = Path("content")
     plugins_dir: Path = Path("plugins")
     client_jar: zipfile.ZipFile = None # type: ignore
     loaded_minecraft_asset_icons: dict[str, str] = field(default_factory=dict)
@@ -56,15 +57,27 @@ def item_to_inline_icon(resource_key: str) -> str:
 
 def load_feature_markdown(markdown_file: Path, default_slug: str) -> Feature:
     with open(markdown_file, "r") as f:
+        raw = f.read()
+
+    metadata = None
+    content = raw
+    if raw.startswith("---"):
+        parts = raw.split("---", 2)
+        if len(parts) >= 3:
+            metadata = yaml.safe_load(parts[1])
+            content = parts[2].strip()
+    else:
         try:
-            metadata, content = f.read().split("```\n---\n", maxsplit=1)
-            metadata = metadata.removeprefix("```toml")
+            metadata_text, content = raw.split("```\n---\n", maxsplit=1)
+            metadata = toml.loads(metadata_text.removeprefix("```toml"))
             content = content.strip()
         except ValueError:
-            print("Missing or invalid metadata section.")
+            print(f"Missing or invalid metadata section in {markdown_file}.")
             exit(1)
 
-    metadata = toml.loads(metadata)
+    if not metadata:
+        print(f"Missing or invalid metadata section in {markdown_file}.")
+        exit(1)
     if "slug" not in metadata:
         metadata["slug"] = default_slug
     metadata["module"] = markdown_file.parent.name.removeprefix("vane-")
@@ -250,10 +263,28 @@ def render_spawn_egg(key: str, base_rgb: tuple[int, int, int], spot_rgb: tuple[i
     _write_png_rgba(out, base_w, base_h, composite)
     return icon
 
+def _committed_minecraft_icon(key: str) -> str | None:
+    for candidate in (
+        f"assets/minecraft/textures/item/{key}.png",
+        f"assets/minecraft/blocks/{key}.png",
+        f"assets/minecraft/textures/block/{key}.png",
+        f"assets/minecraft_special/{key}.png",
+    ):
+        if (context.assets_path / candidate.removeprefix("assets/")).exists():
+            return candidate
+    return None
+
 def minecraft_asset_icon(key: str) -> str:
-    # Don't load again if already known
     if key in context.loaded_minecraft_asset_icons:
         return context.loaded_minecraft_asset_icons[key]
+
+    if context.client_jar is None:
+        icon = _committed_minecraft_icon(key)
+        if icon is None:
+            icon = f"assets/minecraft/textures/item/barrier.png"
+            print(f"\x1b[1;33mwarning:\x1b[m missing committed icon for minecraft:{key}")
+        context.loaded_minecraft_asset_icons[key] = icon
+        return icon
 
     icon = None
     item_model = None
@@ -309,6 +340,8 @@ def item_to_icon(item: str) -> str:
         return f"assets/minecraft_special/leather_chestplate.png"
     elif namespace == "minecraft":
         return minecraft_asset_icon(key)
+    elif namespace == "blume":
+        return f"assets/blume/textures/item/{key}.png"
     elif namespace.startswith("vane"):
         if resource_key == "vane_trifles:north_compass":
             context.required_project_assets.add(("vane-trifles", "items/north_compass_16.png"))
@@ -436,6 +469,23 @@ def render_loot_table(loot: dict[str, Any]) -> str:
     html = html.replace("{{ loot_table.rows }}", "\n".join(table_rows))
     return html
 
+def video_for_feature(markdown_path: Path) -> Path | None:
+    stem = markdown_path.stem
+    video = context.content_dir / "media" / f"{stem}.mp4"
+    return video if video.exists() else None
+
+def render_feature_video(video_path: Path) -> str:
+    src = f"media/{video_path.name}"
+    title = video_path.stem.replace("-", " ")
+    return (
+        f'<figure class="feature-video">'
+        f'<video class="feature-video-player w-full mc-border" controls playsinline preload="metadata">'
+        f'<source src="{src}" type="video/mp4">'
+        f'</video>'
+        f'<figcaption class="sr-only">Demo: {title}</figcaption>'
+        f'</figure>'
+    )
+
 def render_feature(feature: Feature, index: int, count: int) -> str:
     html = context.templates["feature"]
 
@@ -471,6 +521,12 @@ def render_feature(feature: Feature, index: int, count: int) -> str:
 
     html = html.replace("{{ feature.html_content }}", feature.html_content)
 
+    video_path = video_for_feature(Path(feature.loaded_from))
+    if video_path is not None:
+        html = html.replace("{{ feature.video }}", render_feature_video(video_path))
+    else:
+        html = remove_lines_containing(html, "{{ feature.video }}")
+
     enchantment_sources = ""
     if "itemlike" in feature.metadata and feature.metadata["itemlike"].startswith("vane-enchantments:enchantment_"):
         enchantment_sources = render_enchantment_sources(feature)
@@ -503,8 +559,8 @@ def generate_docs() -> None:
         fs = []
         for i in c["content"]:
             print(f"Processing {i}")
-            fs.append(load_feature_markdown(Path("content") / i,
-            default_slug="feature-" + i.removeprefix("content/").removesuffix(".md").replace("/", "--")))
+            fs.append(load_feature_markdown(context.content_dir / i,
+            default_slug="feature-" + i.removesuffix(".md").replace("/", "--")))
         context.features[c["id"]] = fs
 
     index_content = context.templates["index"]
@@ -543,16 +599,20 @@ def collect_trapdoor_sounds() -> None:
     for asset in TRAPDOOR_SOUNDS:
         out = context.assets_path / asset.removeprefix("assets/")
         out.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            out.write_bytes(context.client_jar.read(asset))
-            continue
-        except KeyError:
-            pass
+        if context.client_jar is not None:
+            try:
+                out.write_bytes(context.client_jar.read(asset))
+                continue
+            except KeyError:
+                pass
         src = bundled / asset.removeprefix("assets/")
         if src.exists():
             shutil.copy2(src, out)
         else:
             print(f"\x1b[1;33mwarning:\x1b[m missing trapdoor sound: {asset}")
+
+def collect_static_assets() -> None:
+    collect_trapdoor_sounds()
 
 def upscaled_tile_path(asset: str) -> Path:
     name = Path(asset).name
@@ -755,7 +815,6 @@ def collect_assets() -> None:
         collect_jar_asset(asset)
 
     collect_block_textures()
-    collect_trapdoor_sounds()
 
     print(f"Collecting {len(context.required_project_assets)} required assets from this project...")
     project_root = Path(__file__).resolve().parent.parent.parent
@@ -774,12 +833,29 @@ def collect_assets() -> None:
             continue
         shutil.copy2(src, out)
 
+def collect_media() -> None:
+    media_dir = context.content_dir / "media"
+    if not media_dir.is_dir():
+        return
+    out_dir = context.build_path / "media"
+    videos = sorted(media_dir.glob("*.mp4"))
+    if not videos:
+        return
+    out_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Copying {len(videos)} demo videos to {out_dir}...")
+    for video in videos:
+        shutil.copy2(video, out_dir / video.name)
+
 def main():
     parser = argparse.ArgumentParser(description="Generates the documentation page.")
-    parser.add_argument('--client-jar', required=True, type=str,
+    parser.add_argument('--client-jar', type=str,
             help="Specifies a minecraft client jar file from which required assets will be extracted.")
-    parser.add_argument('--plugins-dir', required=True, type=str,
+    parser.add_argument('--plugins-dir', default="plugins", type=str,
             help="Specifies a plugins/ directory from where vane's generated config can be read (for recipes and loot).")
+    parser.add_argument('--content-dir', default="content", type=str,
+            help="Directory containing feature markdown and media. (default: 'content')")
+    parser.add_argument('--content-toml', default="content.toml", type=str,
+            help="Path to content.toml listing categories and features. (default: 'content.toml')")
     parser.add_argument('-o', '--output-dir', dest='output_dir', default="build", type=str,
             help="Specifies the output directory for the documentation. (default: 'build')")
     args = parser.parse_args()
@@ -790,21 +866,30 @@ def main():
     context.assets_path = context.build_path / "assets"
     context.assets_path.mkdir(parents=True, exist_ok=True)
 
+    context.content_dir = Path(args.content_dir)
     context.plugins_dir = Path(args.plugins_dir)
 
-    context.content_settings = toml.load("content.toml")
+    context.content_settings = toml.load(args.content_toml)
     assert "categories" in context.content_settings
     context.categories = { c["id"]: c for c in context.content_settings["categories"] }
     context.templates = load_templates()
 
-    with zipfile.ZipFile(args.client_jar) as client_jar:
-        context.client_jar = client_jar
+    if args.client_jar:
+        with zipfile.ZipFile(args.client_jar) as client_jar:
+            context.client_jar = client_jar
+            generate_docs()
+            collect_assets()
+            collect_media()
+            collect_static_assets()
+    else:
         generate_docs()
-        collect_assets()
+        collect_media()
+        collect_static_assets()
 
     # Ensure that all content documents are included as a safety check
     used = set(f for cat in context.content_settings["categories"] for f in cat["content"])
-    available = set(f.removeprefix("content/") for f in glob("content/**/*.md", recursive=True))
+    content_glob = str(context.content_dir / "**" / "*.md")
+    available = set(Path(p).relative_to(context.content_dir).as_posix() for p in glob(content_glob, recursive=True))
     missing = available - used
     if len(missing) > 0:
         print(f"[1;33mwarning:[m unused content templates: {', '.join(missing)}")

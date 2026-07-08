@@ -250,6 +250,20 @@ button.bg-block-dirt::after {
 	padding: 1.25rem 1.5rem 1.5rem;
 }
 
+.feature-video {
+	margin-bottom: 1rem;
+}
+
+.feature-video:empty {
+	display: none;
+}
+
+.feature-video-player {
+	display: block;
+	max-width: 100%;
+	background-color: #000;
+}
+
 .feature-toggle {
 	text-shadow: 1px 1px 0 var(--mc-shadow-ink);
 }
