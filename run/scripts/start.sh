@@ -5,6 +5,13 @@ RUN="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$RUN"
 mkdir -p plugins
 
+sed_inplace() {
+  case $(uname -s) in
+  Darwin) sed -i '' "$@" ;;
+  *) sed -i "$@" ;;
+  esac
+}
+
 fetch() {
   test -f "$2" || curl -fsSL "$1" -o "$2"
 }
@@ -28,20 +35,20 @@ if [ ! -f "$CFG" ]; then
   cp "$DEFAULT_CFG" "$CFG"
 fi
 if ! grep -q '^  builtin-host:' "$CFG"; then
-  sed -i '' "/^  enabled:/a\\
+  sed_inplace "/^  enabled:/a\\
   builtin-host: true\\
   host: \"127.0.0.1\"
 " "$CFG"
 fi
-sed -i '' 's/^  builtin-host:.*/  builtin-host: true/' "$CFG"
-sed -i '' 's/^  host:.*/  host: "127.0.0.1"/' "$CFG"
+sed_inplace 's/^  builtin-host:.*/  builtin-host: true/' "$CFG"
+sed_inplace 's/^  host:.*/  host: "127.0.0.1"/' "$CFG"
 
 GEYSER_CFG="plugins/Geyser-Spigot/config.yml"
 patch_geyser_config() {
   test -f "$GEYSER_CFG" || return 0
-  sed -i '' 's/^  auth-type:.*/  auth-type: floodgate/' "$GEYSER_CFG"
-  sed -i '' 's/^  enable-custom-content:.*/  enable-custom-content: true/' "$GEYSER_CFG"
-  sed -i '' 's/^add-non-bedrock-items:.*/add-non-bedrock-items: true/' "$GEYSER_CFG"
+  sed_inplace 's/^  auth-type:.*/  auth-type: floodgate/' "$GEYSER_CFG"
+  sed_inplace 's/^  enable-custom-content:.*/  enable-custom-content: true/' "$GEYSER_CFG"
+  sed_inplace 's/^add-non-bedrock-items:.*/add-non-bedrock-items: true/' "$GEYSER_CFG"
 }
 patch_geyser_config
 
