@@ -22,7 +22,7 @@ public final class AdminConfig {
     private final String graylistJoinMessage;
     private final boolean commandBroadcastEnabled;
     private final String commandBroadcastFormat;
-    private final Set<String> commandBroadcastExcluded;
+    private final Set<String> commandBroadcastCommands;
     private final boolean luckPermsEnabled;
     private final String luckPermsVerifiedGroup;
 
@@ -43,7 +43,7 @@ public final class AdminConfig {
             "command-broadcast.format",
             DEFAULT_COMMAND_FORMAT
         );
-        commandBroadcastExcluded = parseExcludedCommands(admin);
+        commandBroadcastCommands = parseBroadcastCommands(admin);
 
         luckPermsEnabled = sectionBool(admin, "luckperms.enabled", false);
         luckPermsVerifiedGroup = sectionString(admin, "luckperms.verified-group", "");
@@ -65,12 +65,25 @@ public final class AdminConfig {
         return commandBroadcastEnabled;
     }
 
+    public boolean shouldBroadcastCommand(@NotNull String message) {
+        String trimmed = message.trim();
+        if (trimmed.startsWith("//")) {
+            return true;
+        }
+        if (trimmed.isEmpty() || trimmed.charAt(0) != '/') {
+            return false;
+        }
+        String commandLine = trimmed.substring(1);
+        String root = normalizeCommandRoot(commandLine.split("\\s+", 2)[0]);
+        return commandBroadcastCommands.contains(root);
+    }
+
     public @NotNull String commandBroadcastFormat() {
         return commandBroadcastFormat;
     }
 
-    public @NotNull Set<String> commandBroadcastExcluded() {
-        return commandBroadcastExcluded;
+    public @NotNull Set<String> commandBroadcastCommands() {
+        return commandBroadcastCommands;
     }
 
     public boolean isLuckPermsEnabled() {
@@ -81,28 +94,128 @@ public final class AdminConfig {
         return luckPermsVerifiedGroup;
     }
 
-    private static @NotNull Set<String> parseExcludedCommands(ConfigurationSection admin) {
-        Set<String> excluded = new HashSet<>();
-        excluded.add("msg");
-        excluded.add("tell");
-        excluded.add("w");
-        excluded.add("r");
-        excluded.add("me");
+    private static @NotNull Set<String> parseBroadcastCommands(ConfigurationSection admin) {
+        Set<String> commands = new HashSet<>(defaultCheatCommands());
 
         if (admin == null) {
-            return excluded;
+            return commands;
         }
 
-        List<String> configured = admin.getStringList("command-broadcast.excluded-commands");
+        List<String> configured = admin.getStringList("command-broadcast.commands");
         if (configured.isEmpty()) {
-            return excluded;
+            return commands;
         }
 
-        excluded.clear();
+        commands.clear();
         for (String command : configured) {
-            excluded.add(command.toLowerCase(Locale.ROOT));
+            commands.add(normalizeCommandRoot(command));
         }
-        return excluded;
+        return commands;
+    }
+
+    private static @NotNull Set<String> defaultCheatCommands() {
+        Set<String> commands = new HashSet<>();
+        commands.add("gamemode");
+        commands.add("gm");
+        commands.add("give");
+        commands.add("clear");
+        commands.add("item");
+        commands.add("tp");
+        commands.add("teleport");
+        commands.add("effect");
+        commands.add("enchant");
+        commands.add("experience");
+        commands.add("xp");
+        commands.add("fill");
+        commands.add("setblock");
+        commands.add("clone");
+        commands.add("summon");
+        commands.add("kill");
+        commands.add("ride");
+        commands.add("damage");
+        commands.add("time");
+        commands.add("weather");
+        commands.add("difficulty");
+        commands.add("gamerule");
+        commands.add("defaultgamemode");
+        commands.add("spawnpoint");
+        commands.add("setworldspawn");
+        commands.add("spreadplayers");
+        commands.add("worldborder");
+        commands.add("data");
+        commands.add("attribute");
+        commands.add("loot");
+        commands.add("seed");
+        commands.add("locate");
+
+        commands.add("fly");
+        commands.add("god");
+        commands.add("heal");
+        commands.add("feed");
+        commands.add("speed");
+        commands.add("invsee");
+        commands.add("ecsee");
+        commands.add("eecsee");
+        commands.add("endersee");
+        commands.add("openinv");
+        commands.add("openender");
+        commands.add("vanish");
+        commands.add("v");
+        commands.add("socialspy");
+        commands.add("tphere");
+        commands.add("tpahere");
+        commands.add("tpa");
+        commands.add("tpaccept");
+        commands.add("tpdeny");
+        commands.add("tpacancel");
+        commands.add("back");
+        commands.add("kit");
+        commands.add("repair");
+        commands.add("clearinventory");
+        commands.add("ci");
+        commands.add("hat");
+        commands.add("more");
+        commands.add("unlimited");
+        commands.add("unl");
+        commands.add("jump");
+        commands.add("top");
+        commands.add("workbench");
+        commands.add("wb");
+        commands.add("craft");
+        commands.add("enderchest");
+        commands.add("ec");
+        commands.add("burn");
+        commands.add("extinguish");
+        commands.add("extingu");
+        commands.add("gms");
+        commands.add("gmc");
+        commands.add("gma");
+        commands.add("gmsp");
+        commands.add("near");
+        commands.add("spectate");
+        commands.add("spec");
+        commands.add("worldedit");
+        commands.add("we");
+        commands.add("wand");
+        commands.add("brush");
+        commands.add("br");
+        commands.add("tool");
+        commands.add("schematic");
+        commands.add("schem");
+        commands.add("stack");
+        commands.add("undo");
+        commands.add("redo");
+        commands.add("cmi");
+        return commands;
+    }
+
+    static @NotNull String normalizeCommandRoot(@NotNull String command) {
+        String root = command.toLowerCase(Locale.ROOT).trim();
+        int namespace = root.indexOf(':');
+        if (namespace >= 0) {
+            root = root.substring(namespace + 1);
+        }
+        return root;
     }
 
     private static boolean sectionBool(ConfigurationSection section, @NotNull String path, boolean def) {
