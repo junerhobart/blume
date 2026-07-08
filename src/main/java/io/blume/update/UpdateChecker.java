@@ -17,8 +17,7 @@ import java.util.regex.Pattern;
 
 public final class UpdateChecker {
 
-    private static final Pattern MODRINTH_VERSION = Pattern.compile("\"version_number\"\\s*:\\s*\"([^\"]+)\"");
-    private static final Pattern GITHUB_TAG = Pattern.compile("\"tag_name\"\\s*:\\s*\"([^\"]+)\"");
+    private static final Pattern GITHUB_TAG = Pattern.compile("\"name\"\\s*:\\s*\"([^\"]+)\"");
 
     private static final HttpClient HTTP = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(5))
@@ -58,47 +57,18 @@ public final class UpdateChecker {
         @NotNull BlumeConfig config,
         @NotNull String userAgentVersion
     ) {
-        if (!config.getUpdateModrinthSlug().isBlank()) {
-            LatestRelease fromModrinth = fetchModrinthRelease(config.getUpdateModrinthSlug(), userAgentVersion);
-            if (fromModrinth != null) {
-                return fromModrinth;
-            }
+        String repo = config.getUpdateGithubRepo();
+        if (repo.isBlank()) {
+            return null;
         }
-        return fetchGitHubRelease(config.getUpdateGithubRepo(), userAgentVersion);
+        return fetchGitHubTag(repo, userAgentVersion);
     }
 
-    private static @Nullable LatestRelease fetchModrinthRelease(
-        @NotNull String slug,
-        @NotNull String userAgentVersion
-    ) {
-        String url = "https://api.modrinth.com/v2/project/" + slug + "/version";
-        try {
-            HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                .timeout(Duration.ofSeconds(8))
-                .header("User-Agent", "Blume/" + userAgentVersion)
-                .GET()
-                .build();
-            HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
-                return null;
-            }
-            Matcher matcher = MODRINTH_VERSION.matcher(response.body());
-            if (matcher.find()) {
-                String version = matcher.group(1);
-                return new LatestRelease(version, "https://modrinth.com/plugin/" + slug);
-            }
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        } catch (IOException ignored) {
-        }
-        return null;
-    }
-
-    private static @Nullable LatestRelease fetchGitHubRelease(
+    private static @Nullable LatestRelease fetchGitHubTag(
         @NotNull String repo,
         @NotNull String userAgentVersion
     ) {
-        String url = "https://api.github.com/repos/" + repo + "/releases/latest";
+        String url = "https://api.github.com/repos/" + repo + "/tags";
         try {
             HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .timeout(Duration.ofSeconds(8))
@@ -112,8 +82,9 @@ public final class UpdateChecker {
             }
             Matcher matcher = GITHUB_TAG.matcher(response.body());
             if (matcher.find()) {
-                String version = VersionCompare.stripPrefix(matcher.group(1));
-                return new LatestRelease(version, "https://github.com/" + repo + "/releases/latest");
+                String tag = matcher.group(1);
+                String version = VersionCompare.stripPrefix(tag);
+                return new LatestRelease(version, "https://github.com/" + repo + "/releases/tag/" + tag);
             }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();

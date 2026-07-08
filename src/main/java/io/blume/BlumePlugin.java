@@ -43,13 +43,13 @@ public final class BlumePlugin extends JavaPlugin {
     @Override
     public void onLoad() {
         saveDefaultConfig();
-        GeyserAssetInstaller.install(this, new BlumeConfig(getConfig(), getLogger()), getLogger());
+        GeyserAssetInstaller.install(this, loadBlumeConfig(), getLogger());
     }
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        blumeConfig = new BlumeConfig(getConfig(), getLogger());
+        blumeConfig = loadBlumeConfig();
         qolConfig = new QolConfig(getConfig());
         adminConfig = new AdminConfig(getConfig());
         enchantsConfig = new EnchantsConfig(getConfig());
@@ -144,7 +144,7 @@ public final class BlumePlugin extends JavaPlugin {
     public void reload() {
         reloadConfig();
         FileConfiguration cfg = getConfig();
-        blumeConfig = new BlumeConfig(cfg, getLogger());
+        blumeConfig = loadBlumeConfig(cfg);
         qolConfig = new QolConfig(cfg);
         adminConfig = new AdminConfig(cfg);
         enchantsConfig = new EnchantsConfig(cfg);
@@ -180,6 +180,28 @@ public final class BlumePlugin extends JavaPlugin {
     private void sendResourcePackToOnlinePlayers() {
         for (Player player : getServer().getOnlinePlayers()) {
             resourcePackService.sendTo(player);
+        }
+    }
+
+    private BlumeConfig loadBlumeConfig() {
+        return loadBlumeConfig(getConfig());
+    }
+
+    private BlumeConfig loadBlumeConfig(FileConfiguration cfg) {
+        BlumeConfig config = new BlumeConfig(cfg, getPluginMeta().getVersion(), getLogger());
+        syncAutoManagedPackUrl(cfg, config);
+        return config;
+    }
+
+    private void syncAutoManagedPackUrl(FileConfiguration cfg, BlumeConfig config) {
+        String raw = cfg.getString("resource-pack.url");
+        if (raw == null) {
+            raw = "";
+        }
+        String resolved = config.getResourcePackUrl();
+        if (!resolved.equals(raw) && config.isAutoManagedPackUrl(raw)) {
+            cfg.set("resource-pack.url", resolved);
+            saveConfig();
         }
     }
 

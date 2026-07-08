@@ -10,8 +10,6 @@ public final class BlumeConfig {
     private static final String DEFAULT_PROMPT =
         "<green>Blume</green> uses a resource pack for custom items. Please accept.";
     private static final int DEFAULT_PACK_PORT = 8765;
-    private static final String DEFAULT_PACK_URL =
-        "https://github.com/junerhobart/blume/releases/download/v0.0.0/blume-pack.zip";
 
     private final boolean resourcePackEnabled;
     private final String resourcePackUrl;
@@ -22,12 +20,17 @@ public final class BlumeConfig {
     private final String resourcePackPrompt;
     private final boolean bedrockPackEnabled;
     private final boolean updateCheckEnabled;
-    private final String updateModrinthSlug;
     private final String updateGithubRepo;
 
-    public BlumeConfig(@NotNull FileConfiguration cfg, @NotNull Logger log) {
+    public BlumeConfig(
+        @NotNull FileConfiguration cfg,
+        @NotNull String pluginVersion,
+        @NotNull Logger log
+    ) {
         resourcePackEnabled = cfg.getBoolean("resource-pack.enabled", true);
-        resourcePackUrl = nullToEmpty(cfg.getString("resource-pack.url", DEFAULT_PACK_URL));
+        updateGithubRepo = nullToEmpty(cfg.getString("updates.github-repo", "junerhobart/blume"));
+        String rawPackUrl = nullToEmpty(cfg.getString("resource-pack.url"));
+        resourcePackUrl = ConfigPlaceholders.resolvePackUrl(rawPackUrl, pluginVersion, updateGithubRepo);
         resourcePackBuiltinHost = cfg.getBoolean("resource-pack.builtin-host", false);
         resourcePackHost = nullToEmpty(cfg.getString("resource-pack.host"));
         resourcePackPort = cfg.getInt("resource-pack.port", DEFAULT_PACK_PORT);
@@ -35,8 +38,6 @@ public final class BlumeConfig {
         resourcePackPrompt = cfg.getString("resource-pack.prompt", DEFAULT_PROMPT);
         bedrockPackEnabled = cfg.getBoolean("resource-pack.bedrock.enabled", true);
         updateCheckEnabled = cfg.getBoolean("updates.check", true);
-        updateModrinthSlug = nullToEmpty(cfg.getString("updates.modrinth-slug"));
-        updateGithubRepo = nullToEmpty(cfg.getString("updates.github-repo", "junerhobart/blume"));
 
         if (resourcePackEnabled && resourcePackPort <= 0) {
             log.warning("resource-pack.port must be positive. Using " + DEFAULT_PACK_PORT + ".");
@@ -79,12 +80,12 @@ public final class BlumeConfig {
         return updateCheckEnabled;
     }
 
-    public @NotNull String getUpdateModrinthSlug() {
-        return updateModrinthSlug;
-    }
-
     public @NotNull String getUpdateGithubRepo() {
         return updateGithubRepo;
+    }
+
+    public boolean isAutoManagedPackUrl(@NotNull String rawUrl) {
+        return ConfigPlaceholders.isAutoManagedPackUrl(rawUrl, updateGithubRepo);
     }
 
     private static @NotNull String nullToEmpty(String value) {
