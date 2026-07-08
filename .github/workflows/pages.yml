@@ -27,7 +27,7 @@ jobs:
           cache: maven
 
       - name: Build plugin and resource packs
-        run: mvn -B package -DskipTests
+        run: sh scripts/build.sh -B package -DskipTests
 
       - uses: actions/upload-pages-artifact@v3
         with:

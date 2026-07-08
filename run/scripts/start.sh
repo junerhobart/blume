@@ -17,12 +17,8 @@ fetch 'https://cdn.modrinth.com/data/Vebnzrzj/versions/MBSY8toc/LuckPerms-Bukkit
 fetch 'https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot' plugins/Geyser-Spigot.jar
 fetch 'https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot' plugins/floodgate-spigot.jar
 
-revision_arg=
-if tag=$(git -C "$ROOT" describe --tags --exact-match 2>/dev/null); then
-  revision_arg="-Drevision=${tag#v}"
-fi
-(cd "$ROOT" && mvn -q clean package $revision_arg)
-version=$(cd "$ROOT" && mvn -q help:evaluate -Dexpression=project.version -DforceStdout $revision_arg)
+sh "$ROOT/scripts/build.sh" -q clean package
+version=$(sh "$ROOT/scripts/build.sh" -q help:evaluate -Dexpression=project.version -DforceStdout)
 cp "$ROOT/target/Blume-${version}.jar" plugins/Blume.jar
 
 mkdir -p plugins/Blume

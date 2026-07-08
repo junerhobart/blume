@@ -12,6 +12,7 @@ public final class BlumeConfig {
     private static final int DEFAULT_PACK_PORT = 8765;
 
     private final boolean resourcePackEnabled;
+    private final String rawResourcePackUrl;
     private final String resourcePackUrl;
     private final boolean resourcePackBuiltinHost;
     private final String resourcePackHost;
@@ -30,6 +31,7 @@ public final class BlumeConfig {
         resourcePackEnabled = cfg.getBoolean("resource-pack.enabled", true);
         updateGithubRepo = nullToEmpty(cfg.getString("updates.github-repo", "junerhobart/blume"));
         String rawPackUrl = nullToEmpty(cfg.getString("resource-pack.url"));
+        rawResourcePackUrl = rawPackUrl;
         resourcePackUrl = ConfigPlaceholders.resolvePackUrl(rawPackUrl, pluginVersion, updateGithubRepo);
         resourcePackBuiltinHost = cfg.getBoolean("resource-pack.builtin-host", false);
         resourcePackHost = nullToEmpty(cfg.getString("resource-pack.host"));
@@ -86,6 +88,10 @@ public final class BlumeConfig {
 
     public boolean isAutoManagedPackUrl(@NotNull String rawUrl) {
         return ConfigPlaceholders.isAutoManagedPackUrl(rawUrl, updateGithubRepo);
+    }
+
+    public boolean shouldServeBundledPack() {
+        return resourcePackUrl.isEmpty() && isAutoManagedPackUrl(rawResourcePackUrl);
     }
 
     private static @NotNull String nullToEmpty(String value) {

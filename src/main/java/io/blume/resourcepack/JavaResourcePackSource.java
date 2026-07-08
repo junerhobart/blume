@@ -57,7 +57,14 @@ public final class JavaResourcePackSource implements AutoCloseable {
             Files.copy(bundled, destination, StandardCopyOption.REPLACE_EXISTING);
 
             String sha1 = sha1Hex(destination);
-            if (config.isResourcePackBuiltinHost()) {
+            if (config.isResourcePackBuiltinHost() || config.shouldServeBundledPack()) {
+                if (config.shouldServeBundledPack()) {
+                    log.warning(
+                        "[Blume] Non-release build ("
+                            + plugin.getPluginMeta().getVersion()
+                            + "); serving bundled resource pack locally instead of GitHub releases URL."
+                    );
+                }
                 return startBuiltinHost(plugin, config, log, destination, sha1);
             }
 

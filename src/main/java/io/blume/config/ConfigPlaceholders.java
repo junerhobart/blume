@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Pattern;
 
-final class ConfigPlaceholders {
+public final class ConfigPlaceholders {
 
     static final String PACK_URL_TEMPLATE =
         "https://github.com/${github-repo}/releases/download/v${version}/blume-pack.zip";
@@ -16,11 +16,22 @@ final class ConfigPlaceholders {
     private ConfigPlaceholders() {
     }
 
+    static boolean isReleaseVersion(@NotNull String version) {
+        if (version.isBlank() || version.contains("SNAPSHOT") || version.startsWith("0.0.0")) {
+            return false;
+        }
+        return !version.contains("-");
+    }
+
     static @NotNull String resolvePackUrl(
         @NotNull String raw,
         @NotNull String version,
         @NotNull String githubRepo
     ) {
+        if (!isReleaseVersion(version)) {
+            return "";
+        }
+
         String template = raw.isBlank() ? PACK_URL_TEMPLATE : raw;
         String withPlaceholders = template
             .replace("${version}", version)
@@ -43,5 +54,18 @@ final class ConfigPlaceholders {
 
     private static @NotNull String canonicalPackUrl(@NotNull String githubRepo, @NotNull String version) {
         return "https://github.com/" + githubRepo + "/releases/download/v" + version + "/blume-pack.zip";
+    }
+
+    static void selfCheck() {
+        assert isReleaseVersion("0.4.3");
+        assert !isReleaseVersion("0.4.3-2-gabc");
+        assert !isReleaseVersion("0.0.0-SNAPSHOT");
+        assert resolvePackUrl(PACK_URL_TEMPLATE, "0.0.0-SNAPSHOT", "junerhobart/blume").isEmpty();
+        assert resolvePackUrl(PACK_URL_TEMPLATE, "0.4.3", "junerhobart/blume")
+            .equals("https://github.com/junerhobart/blume/releases/download/v0.4.3/blume-pack.zip");
+    }
+
+    public static void main(String[] args) {
+        selfCheck();
     }
 }

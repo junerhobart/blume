@@ -14,4 +14,4 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - run: mvn -B package
+      - run: sh scripts/build.sh -B package
