@@ -13,19 +13,19 @@ Refer to our [website](https://junerhobart.github.io/blume/) for a more comprehe
 ## Gallery
 
 <p align="center">
-  <img src="docs/assets/gifs/auto-smelt.gif" width="32%" />
-  <img src="docs/assets/gifs/creeper-rebuild.gif" width="32%" />
-  <img src="docs/assets/gifs/desire-paths.gif" width="32%" />
+  <img src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/auto-smelt.gif" width="32%" />
+  <img src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/creeper-rebuild.gif" width="32%" />
+  <img src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/desire-paths.gif" width="32%" />
 </p>
 <p align="center">
-  <img src="docs/assets/gifs/double-doors.gif" width="32%" />
-  <img src="docs/assets/gifs/harvest-replant.gif" width="32%" />
-  <img src="docs/assets/gifs/path-speed.gif" width="32%" />
+  <img src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/double-doors.gif" width="32%" />
+  <img src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/harvest-replant.gif" width="32%" />
+  <img src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/path-speed.gif" width="32%" />
 </p>
 <p align="center">
-  <img src="docs/assets/gifs/sickle.gif" width="32%" />
-  <img src="docs/assets/gifs/timber.gif" width="32%" />
-  <img src="docs/assets/gifs/veinminer.gif" width="32%" />
+  <img src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/sickle.gif" width="32%" />
+  <img src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/timber.gif" width="32%" />
+  <img src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/veinminer.gif" width="32%" />
 </p>
 
 

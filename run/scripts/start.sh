@@ -18,7 +18,7 @@ fetch 'https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/l
 fetch 'https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot' plugins/floodgate-spigot.jar
 
 (cd "$ROOT" && mvn -q clean package)
-cp "$ROOT/target/Blume-0.4.1.jar" plugins/Blume.jar
+cp "$ROOT/target/Blume-0.4.2.jar" plugins/Blume.jar
 
 mkdir -p plugins/Blume
 CFG="plugins/Blume/config.yml"

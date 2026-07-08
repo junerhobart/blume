@@ -4,7 +4,7 @@
     "description": "Blume custom seed textures for Bedrock",
     "name": "Blume Bedrock Pack",
     "uuid": "a4c8e2f1-9b3d-4e7a-8f6c-1d2e3f4a5b6c",
-    "version": [0, 4, 0],
+    "version": [0, 4, 2],
     "min_engine_version": [1, 21, 0]
   },
   "modules": [
@@ -12,7 +12,7 @@
       "description": "Blume Bedrock Pack resources",
       "type": "resources",
       "uuid": "b5d9f3a2-0c4e-5f8b-9a7d-2e3f4a5b6c7d",
-      "version": [0, 4, 0]
+      "version": [0, 4, 2]
     }
   ]
 }
