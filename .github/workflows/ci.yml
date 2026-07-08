@@ -71,7 +71,7 @@ jobs:
 
           jq -r '.[] | "\(.id) \(.banner) \(.features[])"' docs/features/categories.json | while read -r cat banner slug; do
             test -f "docs/features/${cat}/${slug}.md"
-            test -f "docs/assets/minecraft/textures/block/tiles/${banner}.png"
+            grep -q "bg-block-${banner}" docs/css/style.css
 
             icon=$(awk '/^---$/{n++; next} n==1 && /^icon:/{sub(/^icon:[[:space:]]*/,""); gsub(/["'\'']/, ""); print; exit}' "docs/features/${cat}/${slug}.md")
             case "$icon" in
