@@ -60,8 +60,6 @@ public final class WildCropGuardListener implements Listener {
         PersistentDataContainer pdc = block.getChunk().getPersistentDataContainer();
         pdc.remove(keys.wildCrop(block));
         pdc.remove(keys.cropOrigin(block));
-        pdc.remove(keys.pollinationCooldown(block));
-        pdc.remove(keys.lastSpread(block));
     }
 
     private void decrementChunkCount(@NotNull Block block) {

@@ -153,7 +153,7 @@ public final class WildCropPopulator {
         return Math.max(plantLight, groundLight) >= MIN_SKY_LIGHT;
     }
 
-    private boolean biomeAllowed(@NotNull Block block) {
+    boolean biomeAllowed(@NotNull Block block) {
         String biome = block.getBiome().getKey().getKey().toLowerCase();
         for (String allowed : config.wildBiomeAllowlist()) {
             if (biome.contains(allowed)) {
@@ -179,18 +179,18 @@ public final class WildCropPopulator {
         return random.nextInt(ageable.getMaximumAge() + 1);
     }
 
-    private void markWild(@NotNull Block block) {
+    void markWild(@NotNull Block block) {
         PersistentDataContainer pdc = block.getChunk().getPersistentDataContainer();
         pdc.set(keys.wildCrop(block), PersistentDataType.STRING, "true");
         pdc.set(keys.cropOrigin(block), PersistentDataType.STRING, "wild");
     }
 
-    private int countWildCrops(@NotNull Chunk chunk) {
+    int countWildCrops(@NotNull Chunk chunk) {
         Integer count = chunk.getPersistentDataContainer().get(keys.wildCropCount(), PersistentDataType.INTEGER);
         return count == null ? 0 : count;
     }
 
-    private void incrementCount(@NotNull Chunk chunk) {
+    void incrementCount(@NotNull Chunk chunk) {
         chunk.getPersistentDataContainer().set(keys.wildCropCount(), PersistentDataType.INTEGER, countWildCrops(chunk) + 1);
     }
 
@@ -230,8 +230,6 @@ public final class WildCropPopulator {
     private void removeWildMarkers(@NotNull PersistentDataContainer pdc, @NotNull Block block) {
         pdc.remove(keys.wildCrop(block));
         pdc.remove(keys.cropOrigin(block));
-        pdc.remove(keys.pollinationCooldown(block));
-        pdc.remove(keys.lastSpread(block));
     }
 
     private @Nullable Block blockFromKey(@NotNull World world, @NotNull String keyName) {

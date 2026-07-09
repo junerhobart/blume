@@ -29,17 +29,17 @@ public final class EcologyConfig {
     private final int wildPatchesPerChunk;
     private final boolean wildBiomeFilter;
     private final Set<String> wildBiomeAllowlist;
+    private final boolean wildCropsSpreadEnabled;
+    private final double wildCropsSpreadChance;
+    private final double wildCropsSpreadIntoGrassChance;
 
     private final boolean naturalGrassEnabled;
-    private final int naturalGrassTickIntervalSeconds;
     private final double naturalGrassShortGrassChance;
     private final double naturalGrassTallGrassChance;
     private final boolean naturalGrassInvadeFarmland;
     private final double naturalGrassInvadeFarmlandChance;
 
     private final boolean pollinationEnabled;
-    private final int pollinationTickIntervalSeconds;
-    private final int pollinationCropCooldownSeconds;
     private final double pollinationFlowerSpreadChance;
 
     private final boolean husbandryEnabled;
@@ -78,17 +78,17 @@ public final class EcologyConfig {
         wildBiomeFilter = sectionBool(ecology, "wild-crops.biome-filter", false);
         wildBiomeAllowlist = parseStringSet(ecology, "wild-crops.biome-allowlist",
             "plains", "forest", "meadow", "savanna", "taiga", "jungle", "swamp", "river");
+        wildCropsSpreadEnabled = sectionBool(ecology, "wild-crops.spread-enabled", true);
+        wildCropsSpreadChance = sectionDouble(ecology, "wild-crops.spread-chance", 0.05);
+        wildCropsSpreadIntoGrassChance = sectionDouble(ecology, "wild-crops.spread-into-grass-chance", 0.02);
 
         naturalGrassEnabled = sectionBool(ecology, "natural-grass.enabled", true);
-        naturalGrassTickIntervalSeconds = sectionInt(ecology, "natural-grass.tick-interval-seconds", 10);
-        naturalGrassShortGrassChance = sectionDouble(ecology, "natural-grass.short-grass-chance", 0.25);
-        naturalGrassTallGrassChance = sectionDouble(ecology, "natural-grass.tall-grass-chance", 0.12);
+        naturalGrassShortGrassChance = sectionDouble(ecology, "natural-grass.short-grass-chance", 0.05);
+        naturalGrassTallGrassChance = sectionDouble(ecology, "natural-grass.tall-grass-chance", 0.03);
         naturalGrassInvadeFarmland = sectionBool(ecology, "natural-grass.invade-farmland", false);
         naturalGrassInvadeFarmlandChance = sectionDouble(ecology, "natural-grass.invade-farmland-chance", 0.08);
 
         pollinationEnabled = sectionBool(ecology, "pollination.enabled", true);
-        pollinationTickIntervalSeconds = sectionInt(ecology, "pollination.tick-interval-seconds", 5);
-        pollinationCropCooldownSeconds = sectionInt(ecology, "pollination.crop-cooldown-seconds", 20);
         pollinationFlowerSpreadChance = sectionDouble(ecology, "pollination.flower-spread-chance", 0.05);
 
         husbandryEnabled = sectionBool(ecology, "husbandry.enabled", true);
@@ -163,12 +163,20 @@ public final class EcologyConfig {
         return wildBiomeAllowlist;
     }
 
-    public boolean isNaturalGrassEnabled() {
-        return naturalGrassEnabled;
+    public boolean isWildCropsSpreadEnabled() {
+        return wildCropsSpreadEnabled;
     }
 
-    public int naturalGrassTickIntervalSeconds() {
-        return naturalGrassTickIntervalSeconds;
+    public double wildCropsSpreadChance() {
+        return wildCropsSpreadChance;
+    }
+
+    public double wildCropsSpreadIntoGrassChance() {
+        return wildCropsSpreadIntoGrassChance;
+    }
+
+    public boolean isNaturalGrassEnabled() {
+        return naturalGrassEnabled;
     }
 
     public double naturalGrassShortGrassChance() {
@@ -189,14 +197,6 @@ public final class EcologyConfig {
 
     public boolean isPollinationEnabled() {
         return pollinationEnabled;
-    }
-
-    public int pollinationTickIntervalSeconds() {
-        return pollinationTickIntervalSeconds;
-    }
-
-    public int pollinationCropCooldownSeconds() {
-        return pollinationCropCooldownSeconds;
     }
 
     public double pollinationFlowerSpreadChance() {

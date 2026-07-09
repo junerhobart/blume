@@ -64,7 +64,7 @@ public final class WelfareYieldListener implements Listener {
         }
         PastureScoreService.PastureScore score = pastureService.score(sheep);
         PastureScoreService.Tier tier = effectiveTier(sheep, score);
-        modifyShearDrops(event.getDrops(), tier);
+        modifyShearDrops(event.getDrops(), tier, score);
         sheep.getPersistentDataContainer().set(keys.shearedAt(), PersistentDataType.LONG, System.currentTimeMillis());
     }
 
@@ -80,6 +80,7 @@ public final class WelfareYieldListener implements Listener {
         Chicken chicken = (Chicken) event.getEntity();
         PastureScoreService.PastureScore score = pastureService.score(chicken);
         PastureScoreService.Tier tier = effectiveTier(chicken, score);
+        double sunlightMultiplier = sunlightYieldMultiplier(score, tier);
         double cancelChance = bonusDouble(tier, "egg-lay-cancel-chance", 0.0);
         if (random.nextDouble() < cancelChance) {
             event.setCancelled(true);
@@ -88,6 +89,9 @@ public final class WelfareYieldListener implements Listener {
         boolean guaranteed = bonusBool(tier, "egg-bonus-guaranteed", false);
         double bonusChance = bonusDouble(tier, "egg-bonus-chance", 0.0);
         if (guaranteed || random.nextDouble() < bonusChance) {
+            item.setAmount(item.getAmount() + 1);
+        }
+        if (sunlightMultiplier > 1.0 && random.nextDouble() < config.husbandrySunlightYieldBonus()) {
             item.setAmount(item.getAmount() + 1);
         }
     }
@@ -116,8 +120,9 @@ public final class WelfareYieldListener implements Listener {
         if (type != EntityType.COW && type != EntityType.PIG) {
             return;
         }
-        PastureScoreService.Tier tier = effectiveTier(event.getEntity(), pastureService.score(event.getEntity()));
-        applyKillDrops(event, type, tier);
+        PastureScoreService.PastureScore score = pastureService.score(event.getEntity());
+        PastureScoreService.Tier tier = effectiveTier(event.getEntity(), score);
+        applyKillDrops(event, type, tier, score);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -147,14 +152,32 @@ public final class WelfareYieldListener implements Listener {
         if (config.isHusbandryStandingBadForcesPoor() && pastureService.isBadStandingBlock(entity.getLocation())) {
             return PastureScoreService.Tier.POOR;
         }
-        return score.tier();
+        PastureScoreService.Tier tier = score.tier();
+        if (config.isHusbandryStandingNoSkyPenalty() && !pastureService.hasSkyAccess(entity.getLocation())) {
+            tier = PastureScoreService.Tier.down(tier);
+        }
+        return tier;
+    }
+
+    private double sunlightYieldMultiplier(
+        @NotNull PastureScoreService.PastureScore score,
+        @NotNull PastureScoreService.Tier tier
+    ) {
+        if (!score.wellSunlit()) {
+            return 1.0;
+        }
+        if (tier != PastureScoreService.Tier.EXCELLENT && tier != PastureScoreService.Tier.GOOD) {
+            return 1.0;
+        }
+        return 1.0 + config.husbandrySunlightYieldBonus();
     }
 
     private void modifyShearDrops(
         @NotNull List<ItemStack> drops,
-        @NotNull PastureScoreService.Tier tier
+        @NotNull PastureScoreService.Tier tier,
+        @NotNull PastureScoreService.PastureScore score
     ) {
-        double multiplier = bonusDouble(tier, "wool-drop-multiplier", 1.0);
+        double multiplier = bonusDouble(tier, "wool-drop-multiplier", 1.0) * sunlightYieldMultiplier(score, tier);
         int bonusMin = bonusInt(tier, "wool-bonus-min", 0);
         double bonusChance = bonusDouble(tier, "wool-bonus-chance", 0.0);
         int penaltyMin = bonusInt(tier, "wool-penalty-min", 0);
@@ -223,15 +246,19 @@ public final class WelfareYieldListener implements Listener {
     private void applyKillDrops(
         @NotNull EntityDeathEvent event,
         @NotNull EntityType type,
-        @NotNull PastureScoreService.Tier tier
+        @NotNull PastureScoreService.Tier tier,
+        @NotNull PastureScoreService.PastureScore score
     ) {
         Material meat = meatType(type, event.getEntity().getFireTicks() > 0);
         if (meat == null) {
             return;
         }
         List<ItemStack> drops = event.getDrops();
-        double bonusRoll = bonusDouble(tier, "kill-bonus-roll", 0.0);
+        double bonusRoll = bonusDouble(tier, "kill-bonus-roll", 0.0) * sunlightYieldMultiplier(score, tier);
         double bonusChance = bonusDouble(tier, "kill-bonus-chance", 0.0);
+        if (sunlightYieldMultiplier(score, tier) > 1.0) {
+            bonusChance = Math.min(1.0, bonusChance + config.husbandrySunlightYieldBonus());
+        }
         int penaltyRoll = bonusInt(tier, "kill-penalty-roll", 0);
         if (bonusRoll > 0.0) {
             int rolls = (int) bonusRoll;

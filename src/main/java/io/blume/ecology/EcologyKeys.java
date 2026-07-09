@@ -10,8 +10,6 @@ public final class EcologyKeys {
     private final NamespacedKey seedType;
     private final NamespacedKey cropOriginRoot;
     private final NamespacedKey wildCropRoot;
-    private final NamespacedKey pollinationCooldownRoot;
-    private final NamespacedKey lastSpreadRoot;
     private final NamespacedKey wildCropCount;
     private final NamespacedKey wildCropsPopulated;
     private final NamespacedKey penId;
@@ -21,8 +19,6 @@ public final class EcologyKeys {
         seedType = new NamespacedKey(plugin, "seed_type");
         cropOriginRoot = new NamespacedKey(plugin, "crop_origin");
         wildCropRoot = new NamespacedKey(plugin, "wild_crop");
-        pollinationCooldownRoot = new NamespacedKey(plugin, "pollination_cooldown");
-        lastSpreadRoot = new NamespacedKey(plugin, "wild_last_spread");
         wildCropCount = new NamespacedKey(plugin, "wild_crop_count");
         wildCropsPopulated = new NamespacedKey(plugin, "wild_crops_populated");
         penId = new NamespacedKey(plugin, "pen_id");
@@ -47,14 +43,6 @@ public final class EcologyKeys {
 
     public @NotNull NamespacedKey shearedAt() {
         return shearedAt;
-    }
-
-    public @NotNull NamespacedKey pollinationCooldown(@NotNull Block block) {
-        return blockScopedKey(pollinationCooldownRoot, block);
-    }
-
-    public @NotNull NamespacedKey lastSpread(@NotNull Block block) {
-        return blockScopedKey(lastSpreadRoot, block);
     }
 
     public @NotNull NamespacedKey wildCropCount() {
