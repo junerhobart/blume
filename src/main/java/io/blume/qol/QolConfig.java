@@ -197,7 +197,7 @@ public final class QolConfig {
     }
 
     private static boolean sectionBool(ConfigurationSection qol, @NotNull String path, boolean def) {
-        return qol != null && qol.getBoolean(path, def);
+        return qol != null ? qol.getBoolean(path, def) : def;
     }
 
     private static int sectionInt(ConfigurationSection qol, @NotNull String path, int def) {
