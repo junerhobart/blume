@@ -5,9 +5,36 @@ on:
     branches: [main]
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.versions.outputs.matrix }}
+      pinned: ${{ steps.versions.outputs.pinned }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: MC versions from pom
+        id: versions
+        run: |
+          pinned=$(sh scripts/build.sh -q help:evaluate -Dexpression=minecraft.version.pinned -DforceStdout)
+          latest=$(sh scripts/build.sh -q help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
+          echo "pinned=${pinned}" >> "$GITHUB_OUTPUT"
+          echo "matrix=[\"${pinned}\",\"${latest}\"]" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        minecraft_version: ${{ fromJSON(needs.setup.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -18,7 +45,7 @@ jobs:
           cache: maven
 
       - name: Build plugin
-        run: sh scripts/build.sh -B package -DskipTests
+        run: sh scripts/build.sh -B package -DskipTests -Dminecraft.version=${{ matrix.minecraft_version }}
 
       - name: Artifact contract
         run: |
@@ -47,7 +74,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: blume-jar
+          name: blume-jar-${{ matrix.minecraft_version }}
           path: target/Blume-*.jar
           retention-days: 1
 
@@ -110,7 +137,7 @@ jobs:
           done
 
   smoke:
-    needs: build
+    needs: [setup, build]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -118,7 +145,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: blume-jar
+          name: blume-jar-${{ needs.setup.outputs.pinned }}
           path: jar
 
       - uses: actions/setup-java@v4

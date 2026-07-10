@@ -16,18 +16,37 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Version from tag
-        id: version
-        run: echo "value=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
           cache: maven
 
+      - name: Version from tag
+        id: release
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          PINNED=$(mvn -q help:evaluate -Dexpression=minecraft.version.pinned -DforceStdout)
+          LATEST=$(mvn -q help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
+          SUFFIX="-${PINNED}"
+
+          case "$TAG" in
+            *"${SUFFIX}")
+              REVISION="${TAG%"${SUFFIX}"}"
+              MC="${PINNED}"
+              ;;
+            *)
+              REVISION="${TAG}"
+              MC="${LATEST}"
+              ;;
+          esac
+
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "revision=${REVISION}" >> "$GITHUB_OUTPUT"
+          echo "minecraft_version=${MC}" >> "$GITHUB_OUTPUT"
+
       - name: Build
-        run: mvn -B -Drevision=${{ steps.version.outputs.value }} package
+        run: mvn -B -Drevision=${{ steps.release.outputs.revision }} -Dminecraft.version=${{ steps.release.outputs.minecraft_version }} package
 
       - name: Changelog since last tag
         run: |
@@ -43,7 +62,7 @@ jobs:
           body_path: changelog.txt
           generate_release_notes: false
           files: |
-            target/Blume-${{ steps.version.outputs.value }}.jar
+            target/Blume-${{ steps.release.outputs.revision }}.jar
             target/blume-pack.zip
             target/blume-bedrock-pack.zip
             target/blume-geyser-mappings.json
@@ -80,21 +99,23 @@ jobs:
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
-          VERSION: ${{ steps.version.outputs.value }}
+          VERSION: ${{ steps.release.outputs.tag }}
+          REVISION: ${{ steps.release.outputs.revision }}
+          MC_VERSION: ${{ steps.release.outputs.minecraft_version }}
         run: |
           JSON=$(jq -n \
             --arg name "Blume ${VERSION}" \
             --arg version_number "$VERSION" \
             --arg changelog "$(cat changelog.txt)" \
             --arg project_id "$MODRINTH_PROJECT_ID" \
-            --argjson game_versions '["1.21.8"]' \
+            --arg mc_version "$MC_VERSION" \
             --argjson loaders '["paper"]' \
             '{
               name: $name,
               version_number: $version_number,
               changelog: $changelog,
               dependencies: [],
-              game_versions: $game_versions,
+              game_versions: [$mc_version],
               version_type: "release",
               loaders: $loaders,
               featured: true,
@@ -107,4 +128,4 @@ jobs:
           curl -fsSL -X POST "https://api.modrinth.com/v2/version" \
             -H "Authorization: ${MODRINTH_TOKEN}" \
             -F "data=${JSON};type=application/json" \
-            -F "jar=@target/Blume-${VERSION}.jar"
+            -F "jar=@target/Blume-${REVISION}.jar"
