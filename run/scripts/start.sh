@@ -5,6 +5,18 @@ RUN="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$RUN"
 mkdir -p plugins
 
+pinned=false
+if [ "${1:-}" = --pinned ]; then
+  pinned=true
+  shift
+fi
+
+if $pinned; then
+  mc=$(sh "$ROOT/scripts/build.sh" -q help:evaluate -Dexpression=minecraft.version.pinned -DforceStdout)
+else
+  mc=$(sh "$ROOT/scripts/build.sh" -q help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
+fi
+
 sed_inplace() {
   case $(uname -s) in
   Darwin) sed -i '' "$@" ;;
@@ -16,7 +28,9 @@ fetch() {
   test -f "$2" || curl -fsSL "$1" -o "$2"
 }
 
-fetch 'https://fill-data.papermc.io/v1/objects/8de7c52c3b02403503d16fac58003f1efef7dd7a0256786843927fa92ee57f1e/paper-1.21.8-60.jar' paper.jar
+paper_url=$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/${mc}/builds" \
+  | jq -r '.[-1].downloads["server:default"].url')
+fetch "$paper_url" "paper-${mc}.jar"
 fetch 'https://cdn.modrinth.com/data/P1OZGk5p/versions/4JQUNqJk/ViaVersion-5.10.1-SNAPSHOT.jar' plugins/ViaVersion.jar
 fetch 'https://cdn.modrinth.com/data/NpvuJQoq/versions/gsSGwSIA/ViaBackwards-5.10.1-SNAPSHOT.jar' plugins/ViaBackwards.jar
 fetch 'https://cdn.modrinth.com/data/FIlZB9L0/versions/Ufl71nST/Terra-bukkit-6.6.6-BETA%2B451683aff-shaded.jar' plugins/Terra.jar
@@ -24,7 +38,7 @@ fetch 'https://cdn.modrinth.com/data/Vebnzrzj/versions/MBSY8toc/LuckPerms-Bukkit
 fetch 'https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot' plugins/Geyser-Spigot.jar
 fetch 'https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot' plugins/floodgate-spigot.jar
 
-sh "$ROOT/scripts/build.sh" -q clean package
+sh "$ROOT/scripts/build.sh" -q clean package -Dminecraft.version="$mc"
 version=$(sh "$ROOT/scripts/build.sh" -q help:evaluate -Dexpression=project.version -DforceStdout)
 cp "$ROOT/target/Blume-${version}.jar" plugins/Blume.jar
 
@@ -57,4 +71,4 @@ printf '%s\n' \
   'eula=true' \
   > eula.txt
 
-exec java -Xms1G -Xmx2G -jar paper.jar --nogui "$@"
+exec java -Xms1G -Xmx2G -jar "paper-${mc}.jar" --nogui "$@"

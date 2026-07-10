@@ -23,9 +23,9 @@
         <!-- Overridden by scripts/build.sh via -Drevision; fallback when git is unavailable -->
         <revision>0.0.0-dev</revision>
         <java.version>21</java.version>
-        <minecraft.version>1.21.8</minecraft.version>
         <minecraft.version.pinned>1.21.8</minecraft.version.pinned>
         <minecraft.version.latest>1.21.11</minecraft.version.latest>
+        <minecraft.version>${minecraft.version.latest}</minecraft.version>
         <paper.api.version>${minecraft.version}-R0.1-SNAPSHOT</paper.api.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>

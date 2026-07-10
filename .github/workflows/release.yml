@@ -31,15 +31,10 @@ jobs:
           SUFFIX="-${PINNED}"
 
           case "$TAG" in
-            *"${SUFFIX}")
-              REVISION="${TAG%"${SUFFIX}"}"
-              MC="${PINNED}"
-              ;;
-            *)
-              REVISION="${TAG}"
-              MC="${LATEST}"
-              ;;
+            *"${SUFFIX}") MC="${PINNED}" ;;
+            *) MC="${LATEST}" ;;
           esac
+          REVISION="${TAG}"
 
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "revision=${REVISION}" >> "$GITHUB_OUTPUT"

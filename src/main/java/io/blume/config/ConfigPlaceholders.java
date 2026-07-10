@@ -13,6 +13,10 @@ public final class ConfigPlaceholders {
         "https://github\\.com/([^/]+/[^/]+)/releases/download/v[^/]+/blume-pack\\.zip"
     );
 
+    private static final Pattern PINNED_RELEASE_SUFFIX = Pattern.compile(
+        "^(\\d+\\.\\d+\\.\\d+)-(\\d+\\.\\d+(?:\\.\\d+)?)$"
+    );
+
     private ConfigPlaceholders() {
     }
 
@@ -20,7 +24,14 @@ public final class ConfigPlaceholders {
         if (version.isBlank() || version.contains("SNAPSHOT") || version.startsWith("0.0.0")) {
             return false;
         }
-        return !version.contains("-");
+        if (!version.contains("-")) {
+            return true;
+        }
+        return PINNED_RELEASE_SUFFIX.matcher(version).matches();
+    }
+
+    static @NotNull String releaseTag(@NotNull String version) {
+        return version;
     }
 
     static @NotNull String resolvePackUrl(
@@ -33,13 +44,14 @@ public final class ConfigPlaceholders {
         }
 
         String template = raw.isBlank() ? PACK_URL_TEMPLATE : raw;
+        String tag = releaseTag(version);
         String withPlaceholders = template
-            .replace("${version}", version)
+            .replace("${version}", tag)
             .replace("${github-repo}", githubRepo);
 
         var matcher = GITHUB_PACK_URL.matcher(withPlaceholders);
         if (matcher.matches() && matcher.group(1).equals(githubRepo)) {
-            return canonicalPackUrl(githubRepo, version);
+            return canonicalPackUrl(githubRepo, tag);
         }
         return withPlaceholders;
     }
@@ -60,6 +72,9 @@ public final class ConfigPlaceholders {
         if (!isReleaseVersion("0.4.3")) {
             throw new AssertionError("expected release version 0.4.3");
         }
+        if (!isReleaseVersion("0.4.6-1.21.8")) {
+            throw new AssertionError("pinned release tag must be treated as release");
+        }
         if (isReleaseVersion("0.4.3-2-gabc")) {
             throw new AssertionError("dirty version must not be treated as release");
         }
@@ -69,9 +84,13 @@ public final class ConfigPlaceholders {
         if (!resolvePackUrl(PACK_URL_TEMPLATE, "0.0.0-SNAPSHOT", "junerhobart/blume").isEmpty()) {
             throw new AssertionError("snapshot version must not resolve pack url");
         }
-        String resolved = resolvePackUrl(PACK_URL_TEMPLATE, "0.4.3", "junerhobart/blume");
-        if (!resolved.equals("https://github.com/junerhobart/blume/releases/download/v0.4.3/blume-pack.zip")) {
-            throw new AssertionError("unexpected pack url: " + resolved);
+        if (!resolvePackUrl(PACK_URL_TEMPLATE, "0.4.3", "junerhobart/blume")
+            .equals("https://github.com/junerhobart/blume/releases/download/v0.4.3/blume-pack.zip")) {
+            throw new AssertionError("unexpected pack url for 0.4.3");
+        }
+        String pinned = resolvePackUrl(PACK_URL_TEMPLATE, "0.4.6-1.21.8", "junerhobart/blume");
+        if (!pinned.equals("https://github.com/junerhobart/blume/releases/download/v0.4.6-1.21.8/blume-pack.zip")) {
+            throw new AssertionError("unexpected pinned pack url: " + pinned);
         }
     }
 

@@ -10,6 +10,7 @@ jobs:
     outputs:
       matrix: ${{ steps.versions.outputs.matrix }}
       pinned: ${{ steps.versions.outputs.pinned }}
+      latest: ${{ steps.versions.outputs.latest }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,6 +26,7 @@ jobs:
           pinned=$(sh scripts/build.sh -q help:evaluate -Dexpression=minecraft.version.pinned -DforceStdout)
           latest=$(sh scripts/build.sh -q help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
           echo "pinned=${pinned}" >> "$GITHUB_OUTPUT"
+          echo "latest=${latest}" >> "$GITHUB_OUTPUT"
           echo "matrix=[\"${pinned}\",\"${latest}\"]" >> "$GITHUB_OUTPUT"
 
   build:
@@ -140,12 +142,16 @@ jobs:
     needs: [setup, build]
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        minecraft_version: ${{ fromJSON(needs.setup.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/download-artifact@v4
         with:
-          name: blume-jar-${{ needs.setup.outputs.pinned }}
+          name: blume-jar-${{ matrix.minecraft_version }}
           path: jar
 
       - uses: actions/setup-java@v4
@@ -161,8 +167,10 @@ jobs:
           rm -rf "$work"
           mkdir -p "$work/plugins/Blume"
 
-          curl -fsSL -o "$work/paper.jar" \
-            'https://fill-data.papermc.io/v1/objects/8de7c52c3b02403503d16fac58003f1efef7dd7a0256786843927fa92ee57f1e/paper-1.21.8-60.jar'
+          mc='${{ matrix.minecraft_version }}'
+          paper_url=$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/${mc}/builds" \
+            | jq -r '.[-1].downloads["server:default"].url')
+          curl -fsSL -o "$work/paper.jar" "$paper_url"
 
           cp jar/Blume-*.jar "$work/plugins/Blume.jar"
 
