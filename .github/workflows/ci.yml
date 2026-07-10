@@ -57,14 +57,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Assemble docs site
+        run: sh scripts/assemble-docs-site.sh
+
       - name: Docs static checks
         run: |
           set -eu
-          test -f docs/index.html
-          test -f docs/css/style.css
-          test -f docs/js/site.js
-          test -f docs/js/accordion.js
-          test -f docs/assets/icon.png
+          site=target/docs-site
+          test -f "$site/index.html"
+          test -f "$site/css/style.css"
+          test -f "$site/js/site.js"
+          test -f "$site/js/accordion.js"
+          test -f resourcepack/java/pack.png
           test -f docs/favicon.ico
 
           jq -e 'length > 0' docs/features/categories.json >/dev/null
@@ -79,7 +83,7 @@ jobs:
                 test -f "docs/assets/minecraft/textures/item/${icon#minecraft:}.png"
                 ;;
               blume:*)
-                test -f "docs/assets/textures/${icon#blume:}.png"
+                test -f "resourcepack/java/assets/blume/textures/item/${icon#blume:}.png"
                 ;;
               *)
                 echo "missing or unknown icon in ${cat}/${slug}.md: ${icon}"
@@ -91,7 +95,7 @@ jobs:
       - name: Docs HTTP smoke
         run: |
           set -eu
-          python3 -m http.server 4173 --directory docs &
+          python3 -m http.server 4173 --directory target/docs-site &
           web_pid=$!
           trap 'kill "$web_pid" 2>/dev/null || true' EXIT
           sleep 1
