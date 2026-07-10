@@ -2,7 +2,7 @@ package io.blume.ecology.pollination;
 
 import io.blume.BlumePlugin;
 import io.blume.ecology.EcologyConfig;
-import io.blume.ecology.EcologyKeys;
+import io.blume.ecology.RandomTickPace;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -13,8 +13,6 @@ import org.bukkit.block.data.Ageable;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Bee;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +27,7 @@ public final class BeePollinationListener extends BukkitRunnable {
     private static final int CROP_RADIUS = 3;
     private static final int FLOWER_RADIUS = 2;
     private static final int MAX_CROPS_PER_POLLINATION = 10;
+    private static final double BEES_PER_SECOND_AT_VANILLA = 2.0 / 60.0;
     private static final BlockFace[] ADJACENT = {
         BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST,
         BlockFace.UP, BlockFace.DOWN
@@ -40,31 +39,44 @@ public final class BeePollinationListener extends BukkitRunnable {
 
     private final BlumePlugin plugin;
     private final EcologyConfig config;
-    private final EcologyKeys keys;
-    private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
-    public BeePollinationListener(@NotNull BlumePlugin plugin, @NotNull EcologyConfig config, @NotNull EcologyKeys keys) {
+    public BeePollinationListener(@NotNull BlumePlugin plugin, @NotNull EcologyConfig config) {
         this.plugin = plugin;
         this.config = config;
-        this.keys = keys;
     }
 
     public void start() {
-        long interval = 20L * Math.max(1, config.pollinationTickIntervalSeconds());
-        runTaskTimer(plugin, interval, interval);
+        runTaskTimer(plugin, 40L, 1L);
     }
 
     @Override
     public void run() {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         for (World world : Bukkit.getWorlds()) {
-            for (Bee bee : world.getEntitiesByClass(Bee.class)) {
-                if (!bee.hasNectar()) {
-                    continue;
-                }
+            if (!RandomTickPace.isActive(world)) {
+                continue;
+            }
+            List<Bee> nectarBees = collectNectarBees(world);
+            if (nectarBees.isEmpty()) {
+                continue;
+            }
+            int samples = RandomTickPace.rollSamplesPerTick(BEES_PER_SECOND_AT_VANILLA, world, random);
+            for (int i = 0; i < samples; i++) {
+                Bee bee = nectarBees.get(random.nextInt(nectarBees.size()));
                 pollinateCrop(bee);
-                spreadFlower(bee);
+                spreadFlower(bee, random);
             }
         }
+    }
+
+    private @NotNull List<Bee> collectNectarBees(@NotNull World world) {
+        List<Bee> bees = new ArrayList<>();
+        for (Bee bee : world.getEntitiesByClass(Bee.class)) {
+            if (bee.hasNectar()) {
+                bees.add(bee);
+            }
+        }
+        return bees;
     }
 
     private void pollinateCrop(@NotNull Bee bee) {
@@ -75,19 +87,10 @@ public final class BeePollinationListener extends BukkitRunnable {
         if (crop == null) {
             return;
         }
-        long now = System.currentTimeMillis() / 1000;
-        PersistentDataContainer cropPdc = crop.getChunk().getPersistentDataContainer();
-        long last = cropPdc.getOrDefault(keys.pollinationCooldown(crop), PersistentDataType.LONG, 0L);
-        if (now - last < config.pollinationCropCooldownSeconds()) {
-            return;
-        }
         if (crop.getBlockData() instanceof Ageable ageable) {
-            int remaining = ageable.getMaximumAge() - ageable.getAge();
-            if (remaining > 0) {
-                int increment = 1 + random.nextInt(remaining);
-                ageable.setAge(Math.min(ageable.getMaximumAge(), ageable.getAge() + increment));
+            if (ageable.getAge() < ageable.getMaximumAge()) {
+                ageable.setAge(ageable.getAge() + 1);
                 crop.setBlockData(ageable, false);
-                cropPdc.set(keys.pollinationCooldown(crop), PersistentDataType.LONG, now);
                 bee.setCropsGrownSincePollination(bee.getCropsGrownSincePollination() + 1);
             }
         }
@@ -119,7 +122,7 @@ public final class BeePollinationListener extends BukkitRunnable {
         return nearest;
     }
 
-    private void spreadFlower(@NotNull Bee bee) {
+    private void spreadFlower(@NotNull Bee bee, @NotNull ThreadLocalRandom random) {
         if (random.nextDouble() >= config.pollinationFlowerSpreadChance()) {
             return;
         }
@@ -136,7 +139,7 @@ public final class BeePollinationListener extends BukkitRunnable {
         if (!above.isEmpty()) {
             return;
         }
-        Material newFlower = randomFlower();
+        Material newFlower = randomFlower(random);
         if (newFlower == null) {
             return;
         }
@@ -160,14 +163,14 @@ public final class BeePollinationListener extends BukkitRunnable {
         if (flowers.isEmpty()) {
             return null;
         }
-        return flowers.get(random.nextInt(flowers.size()));
+        return flowers.get(ThreadLocalRandom.current().nextInt(flowers.size()));
     }
 
     private boolean isFlowerSoil(@NotNull Block block) {
         return FLOWER_SOILS.contains(block.getType());
     }
 
-    private @Nullable Material randomFlower() {
+    private @Nullable Material randomFlower(@NotNull ThreadLocalRandom random) {
         List<Material> flowers = new ArrayList<>(Tag.FLOWERS.getValues());
         if (flowers.isEmpty()) {
             return null;

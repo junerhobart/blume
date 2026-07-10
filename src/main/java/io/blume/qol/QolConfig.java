@@ -23,6 +23,9 @@ public final class QolConfig {
     private final int walksToTrample;
     private final int walksToWorn;
     private final int walksToPath;
+    private final boolean desirePathDeErosionEnabled;
+    private final int desirePathDeErosionTrampledMcDays;
+    private final int desirePathDeErosionWornMcDays;
     private final Map<Material, Integer> wornWeights;
     private final boolean deathDropsEnabled;
     private final long deathDropLifetimeMinutes;
@@ -46,9 +49,12 @@ public final class QolConfig {
         creeperRebuildWither = sectionBool(qol, "creeper-rebuild.rebuild-wither", true);
 
         desirePathsEnabled = sectionBool(qol, "desire-paths.enabled", true);
-        walksToTrample = sectionInt(qol, "desire-paths.walks-to-trample", 8);
-        walksToWorn = sectionInt(qol, "desire-paths.walks-to-worn", 16);
-        walksToPath = sectionInt(qol, "desire-paths.walks-to-path", 24);
+        walksToTrample = sectionInt(qol, "desire-paths.walks-to-trample", 4);
+        walksToWorn = sectionInt(qol, "desire-paths.walks-to-worn", 8);
+        walksToPath = sectionInt(qol, "desire-paths.walks-to-path", 12);
+        desirePathDeErosionEnabled = sectionBool(qol, "desire-paths.erosion.enabled", true);
+        desirePathDeErosionTrampledMcDays = sectionInt(qol, "desire-paths.erosion.timeout-mc-days.trampled", 5);
+        desirePathDeErosionWornMcDays = sectionInt(qol, "desire-paths.erosion.timeout-mc-days.worn", 8);
         wornWeights = parseWornWeights(qol);
 
         deathDropsEnabled = sectionBool(qol, "death-drops.enabled", true);
@@ -104,6 +110,18 @@ public final class QolConfig {
 
     public int walksToPath() {
         return walksToPath;
+    }
+
+    public boolean isDesirePathDeErosionEnabled() {
+        return desirePathDeErosionEnabled;
+    }
+
+    public int desirePathDeErosionTrampledMcDays() {
+        return desirePathDeErosionTrampledMcDays;
+    }
+
+    public int desirePathDeErosionWornMcDays() {
+        return desirePathDeErosionWornMcDays;
     }
 
     public @NotNull Map<Material, Integer> wornWeights() {
@@ -197,7 +215,7 @@ public final class QolConfig {
     }
 
     private static boolean sectionBool(ConfigurationSection qol, @NotNull String path, boolean def) {
-        return qol != null && qol.getBoolean(path, def);
+        return qol != null ? qol.getBoolean(path, def) : def;
     }
 
     private static int sectionInt(ConfigurationSection qol, @NotNull String path, int def) {

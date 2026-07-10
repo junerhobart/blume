@@ -14,16 +14,10 @@ Custom item textures: `docs/assets/textures/`
 
 ## Website
 
-Static files in `docs/`. No build step.
-
 ```bash
 cd docs
 python3 -m http.server 8765
 ```
-
-- Feature pages: `docs/features/{category}/*.md`
-- Demo videos: `docs/assets/videos/*.mp4`
-- Images: `docs/assets/`
 
 # Local testing
 
@@ -38,9 +32,5 @@ Note: you can also run `'/Users/junehobart/Projects/blume/run/scripts/purge.sh'`
 - Avoid unrelated refactors in the same PR.
 - Do not commit generated files unless the project already tracks them.
 - 'AI assisted' or 'vibecoded' commits are permitted, but I better not see a +200k line commit.
-
-# License
-
-By contributing, you agree that your contributions will be licensed under the same license as the project ([GPL-3.0](./LICENSE)).
 
 You can dm me on discord `@junehobart` if you have any more questions.

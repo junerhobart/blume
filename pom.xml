@@ -50,6 +50,18 @@
             <version>5.4</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.27.3</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -103,6 +115,11 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>3.1.0</version>
                 <executions>
@@ -123,22 +140,12 @@
                                           location="${project.build.directory}/blume-bedrock-pack.zip"/>
                                 <property name="geyser.mappings"
                                           location="${project.build.directory}/blume-geyser-mappings.json"/>
-                                <property name="docs.textures"
-                                          location="${project.basedir}/docs/assets/textures"/>
+                                <property name="java.textures"
+                                          location="${project.basedir}/resourcepack/java/assets/blume/textures/item"/>
                                 <delete dir="${java.stage}" quiet="true"/>
                                 <copy todir="${java.stage}">
                                     <fileset dir="${project.basedir}/resourcepack/java"/>
                                 </copy>
-                                <mkdir dir="${java.stage}/assets/blume/textures/item"/>
-                                <copy todir="${java.stage}/assets/blume/textures/item" overwrite="true">
-                                    <fileset dir="${docs.textures}">
-                                        <include name="*.png"/>
-                                    </fileset>
-                                </copy>
-                                <copy file="${project.basedir}/docs/assets/icon.png"
-                                      tofile="${java.stage}/pack.png"
-                                      overwrite="true"
-                                      failonerror="false"/>
                                 <zip destfile="${pack.zip}" basedir="${java.stage}"/>
                                 <copy file="${pack.zip}"
                                       tofile="${project.build.directory}/classes/java-pack.zip"/>
@@ -151,7 +158,7 @@
                                     </fileset>
                                 </copy>
                                 <copy todir="${bedrock.stage}/textures/items">
-                                    <fileset dir="${docs.textures}">
+                                    <fileset dir="${java.textures}">
                                         <include name="*.png"/>
                                     </fileset>
                                 </copy>

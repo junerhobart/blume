@@ -10,6 +10,7 @@ import io.blume.ecology.EcologyModule;
 import io.blume.ecology.command.EcologyGiveCommand;
 import io.blume.command.BlumeCommand;
 import io.blume.config.BlumeConfig;
+import io.blume.config.ConfigMerger;
 import io.blume.geyser.GeyserAssetInstaller;
 import io.blume.listener.PlayerJoinListener;
 import io.blume.qol.QolConfig;
@@ -21,9 +22,14 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 public final class BlumePlugin extends JavaPlugin {
@@ -42,18 +48,18 @@ public final class BlumePlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        saveDefaultConfig();
+        loadAndMergeConfig();
         GeyserAssetInstaller.install(this, loadBlumeConfig(), getLogger());
     }
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
-        blumeConfig = loadBlumeConfig();
-        qolConfig = new QolConfig(getConfig());
-        adminConfig = new AdminConfig(getConfig());
-        enchantsConfig = new EnchantsConfig(getConfig());
-        ecologyConfig = new EcologyConfig(getConfig());
+        FileConfiguration cfg = loadAndMergeConfig();
+        blumeConfig = loadBlumeConfig(cfg);
+        qolConfig = new QolConfig(cfg);
+        adminConfig = new AdminConfig(cfg);
+        enchantsConfig = new EnchantsConfig(cfg);
+        ecologyConfig = new EcologyConfig(cfg);
 
         javaResourcePackSource = JavaResourcePackSource.start(this, blumeConfig, getLogger());
         resourcePackService = new ResourcePackService(
@@ -142,8 +148,7 @@ public final class BlumePlugin extends JavaPlugin {
     }
 
     public void reload() {
-        reloadConfig();
-        FileConfiguration cfg = getConfig();
+        FileConfiguration cfg = loadAndMergeConfig();
         blumeConfig = loadBlumeConfig(cfg);
         qolConfig = new QolConfig(cfg);
         adminConfig = new AdminConfig(cfg);
@@ -185,6 +190,30 @@ public final class BlumePlugin extends JavaPlugin {
 
     private BlumeConfig loadBlumeConfig() {
         return loadBlumeConfig(getConfig());
+    }
+
+    private FileConfiguration loadAndMergeConfig() {
+        saveDefaultConfig();
+        reloadConfig();
+        FileConfiguration user = getConfig();
+        FileConfiguration defaults = YamlConfiguration.loadConfiguration(
+            new InputStreamReader(requireConfigResource(), StandardCharsets.UTF_8)
+        );
+        ConfigMerger.warnDeprecatedPaths(user, getLogger());
+        int added = ConfigMerger.mergeMissing(user, defaults);
+        if (added > 0) {
+            saveConfig();
+            getLogger().info("Added " + added + " new config key(s) from defaults.");
+        }
+        return user;
+    }
+
+    private @NotNull InputStream requireConfigResource() {
+        InputStream stream = getResource("config.yml");
+        if (stream == null) {
+            throw new IllegalStateException("Missing bundled config.yml");
+        }
+        return stream;
     }
 
     private BlumeConfig loadBlumeConfig(FileConfiguration cfg) {

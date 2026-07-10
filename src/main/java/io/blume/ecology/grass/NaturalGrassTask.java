@@ -2,6 +2,7 @@ package io.blume.ecology.grass;
 
 import io.blume.BlumePlugin;
 import io.blume.ecology.EcologyConfig;
+import io.blume.ecology.RandomTickSampler;
 import io.blume.ecology.SoilSurface;
 import org.bukkit.Bukkit;
 import org.bukkit.HeightMap;
@@ -12,7 +13,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,38 +25,32 @@ public final class NaturalGrassTask extends BukkitRunnable {
         Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS
     );
     private static final BlockFace[] HORIZONTAL = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
-    private static final int SAMPLES_PER_WORLD = 96;
     private static final int MIN_SKY_LIGHT = 4;
 
     private final BlumePlugin plugin;
     private final EcologyConfig config;
+    private final RandomTickSampler sampler;
 
-    public NaturalGrassTask(@NotNull BlumePlugin plugin, @NotNull EcologyConfig config) {
+    public NaturalGrassTask(
+        @NotNull BlumePlugin plugin,
+        @NotNull EcologyConfig config,
+        @NotNull RandomTickSampler sampler
+    ) {
         this.plugin = plugin;
         this.config = config;
+        this.sampler = sampler;
     }
 
     public void start() {
-        long interval = 20L * Math.max(1, config.naturalGrassTickIntervalSeconds());
-        runTaskTimer(plugin, 40L, interval);
+        runTaskTimer(plugin, 40L, 1L);
     }
 
     @Override
     public void run() {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         for (World world : Bukkit.getWorlds()) {
-            if (world.getPlayers().isEmpty() && world.getLoadedChunks().length == 0) {
-                continue;
-            }
-            ThreadLocalRandom random = ThreadLocalRandom.current();
-            int samples = Math.min(SAMPLES_PER_WORLD, Math.max(16, world.getPlayers().size() * 24));
-            for (Player player : world.getPlayers()) {
-                int perPlayer = Math.max(1, samples / world.getPlayers().size());
-                for (int i = 0; i < perPlayer; i++) {
-                    int x = player.getLocation().getBlockX() + random.nextInt(25) - 12;
-                    int z = player.getLocation().getBlockZ() + random.nextInt(25) - 12;
-                    tryGrowAt(world, x, z, player.getLocation().getBlockY(), random);
-                }
-            }
+            sampler.sampleBlocks(world, block ->
+                tryGrowAt(world, block.getX(), block.getZ(), block.getY(), random));
         }
     }
 

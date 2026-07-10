@@ -14,6 +14,7 @@ import io.blume.ecology.pollination.BeePollinationListener;
 import io.blume.ecology.wild.WildCropChunkListener;
 import io.blume.ecology.wild.WildCropGuardListener;
 import io.blume.ecology.wild.WildCropPopulator;
+import io.blume.ecology.wild.WildCropSpreadTask;
 import io.blume.qol.harvest.CropHarvest;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -65,14 +66,21 @@ public final class EcologyModule {
             register(new WildCropGuardListener(keys));
             register(chunkListener);
             chunkListener.populateLoadedChunks();
+            if (config.isWildCropsSpreadEnabled()) {
+                RandomTickSampler sampler = new RandomTickSampler();
+                WildCropSpreadTask spreadTask = new WildCropSpreadTask(plugin, config, keys, populator, sampler);
+                spreadTask.start();
+                tasks.add(spreadTask);
+            }
         }
         if (config.isNaturalGrassEnabled()) {
-            NaturalGrassTask naturalGrassTask = new NaturalGrassTask(plugin, config);
+            RandomTickSampler sampler = new RandomTickSampler();
+            NaturalGrassTask naturalGrassTask = new NaturalGrassTask(plugin, config, sampler);
             naturalGrassTask.start();
             tasks.add(naturalGrassTask);
         }
         if (config.isPollinationEnabled()) {
-            BeePollinationListener beePollination = new BeePollinationListener(plugin, config, keys);
+            BeePollinationListener beePollination = new BeePollinationListener(plugin, config);
             beePollination.start();
             tasks.add(beePollination);
         }

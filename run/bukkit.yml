@@ -9,6 +9,7 @@
 # Discord: https://discord.gg/papermc
 # Website: https://papermc.io/
 
+aliases: now-in-commands.yml
 settings:
   allow-end: true
   warn-on-overload: true
@@ -32,6 +33,8 @@ spawn-limits:
 chunk-gc:
   period-in-ticks: 600
 ticks-per:
+  ambient-spawns: 1
+  autosave: 6000
   animal-spawns: 400
   monster-spawns: 1
   water-spawns: 1

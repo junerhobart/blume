@@ -57,12 +57,22 @@ public final class ConfigPlaceholders {
     }
 
     static void selfCheck() {
-        assert isReleaseVersion("0.4.3");
-        assert !isReleaseVersion("0.4.3-2-gabc");
-        assert !isReleaseVersion("0.0.0-SNAPSHOT");
-        assert resolvePackUrl(PACK_URL_TEMPLATE, "0.0.0-SNAPSHOT", "junerhobart/blume").isEmpty();
-        assert resolvePackUrl(PACK_URL_TEMPLATE, "0.4.3", "junerhobart/blume")
-            .equals("https://github.com/junerhobart/blume/releases/download/v0.4.3/blume-pack.zip");
+        if (!isReleaseVersion("0.4.3")) {
+            throw new AssertionError("expected release version 0.4.3");
+        }
+        if (isReleaseVersion("0.4.3-2-gabc")) {
+            throw new AssertionError("dirty version must not be treated as release");
+        }
+        if (isReleaseVersion("0.0.0-SNAPSHOT")) {
+            throw new AssertionError("snapshot version must not be treated as release");
+        }
+        if (!resolvePackUrl(PACK_URL_TEMPLATE, "0.0.0-SNAPSHOT", "junerhobart/blume").isEmpty()) {
+            throw new AssertionError("snapshot version must not resolve pack url");
+        }
+        String resolved = resolvePackUrl(PACK_URL_TEMPLATE, "0.4.3", "junerhobart/blume");
+        if (!resolved.equals("https://github.com/junerhobart/blume/releases/download/v0.4.3/blume-pack.zip")) {
+            throw new AssertionError("unexpected pack url: " + resolved);
+        }
     }
 
     public static void main(String[] args) {

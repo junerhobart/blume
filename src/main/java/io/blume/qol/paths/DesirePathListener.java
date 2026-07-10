@@ -32,7 +32,7 @@ public final class DesirePathListener implements Listener {
             return;
         }
 
-        Block ground = event.getTo().clone().subtract(0, 0.1, 0).getBlock();
+        Block ground = event.getTo().clone().subtract(0, 1, 0).getBlock();
         service.recordWalk(ground);
     }
 }

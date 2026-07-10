@@ -38,6 +38,7 @@ public final class PastureScoreService {
     private static final int STAGGER_TICKS = 20;
     private static final int CLEANUP_INTERVAL_TICKS = 200;
     private static final int ENTITY_SEARCH_PADDING_Y = 4;
+    private static final int MIN_SKY_LIGHT = 4;
 
     private static final int[] DX = {1, -1, 0, 0};
     private static final int[] DZ = {0, 0, 1, -1};
@@ -89,6 +90,10 @@ public final class PastureScoreService {
         return config.husbandryBadFlooring().contains(floor.getType());
     }
 
+    public boolean hasSkyAccess(@NotNull Location location) {
+        return location.getBlock().getLightFromSky() >= MIN_SKY_LIGHT;
+    }
+
     public void shutdown() {
         cleanupTask.cancel();
         cache.clear();
@@ -120,10 +125,11 @@ public final class PastureScoreService {
 
         Tier tier = tierFromDensity(ratio);
         tier = applyFlooring(tier, entry);
+        tier = applySunlight(tier, entry);
         if (entry.water && config.isHusbandryWaterBoost()) {
             tier = Tier.up(tier);
         }
-        return new PastureScore(tier, entry.walkableBlocks, animalCount, minBlocks, entry.water);
+        return new PastureScore(tier, entry.walkableBlocks, animalCount, minBlocks, entry.water, entry.wellSunlit);
     }
 
     private @NotNull Tier tierFromDensity(double ratio) {
@@ -154,6 +160,26 @@ public final class PastureScoreService {
             tier = Tier.down(tier);
         }
         return tier;
+    }
+
+    private @NotNull Tier applySunlight(@NotNull Tier tier, @NotNull PastureCacheEntry entry) {
+        if (!config.isHusbandrySunlightBoostEnabled() || entry.walkableBlocks == 0) {
+            return tier;
+        }
+        if (entry.skyFraction >= config.husbandrySunlightBoostThreshold()) {
+            tier = Tier.up(tier);
+        }
+        return tier;
+    }
+
+    private boolean isSheltered(@NotNull World world, @NotNull BlockPos cell) {
+        int maxScan = config.husbandryShelterRequiredMaxRadius();
+        for (int dy = 1; dy <= maxScan; dy++) {
+            if (world.getBlockAt(cell.x, cell.y + dy, cell.z).getType().isSolid()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private @NotNull FloodResult floodFill(@NotNull World world, int startX, int startY, int startZ) {
@@ -227,6 +253,7 @@ public final class PastureScoreService {
         World world = animal.getWorld();
         int good = 0;
         int bad = 0;
+        int skyAccessible = 0;
         boolean water = false;
         for (BlockPos cell : region.cells) {
             Block floor = world.getBlockAt(cell.x, cell.y - 1, cell.z);
@@ -236,15 +263,35 @@ public final class PastureScoreService {
             } else if (config.husbandryBadFlooring().contains(floorType)) {
                 bad++;
             }
+            Block head = world.getBlockAt(cell.x, cell.y + 1, cell.z);
+            boolean cellSheltered = isSheltered(world, cell);
+            if (head.getLightFromSky() >= MIN_SKY_LIGHT && !cellSheltered) {
+                skyAccessible++;
+            }
             Block surface = world.getBlockAt(cell.x, cell.y, cell.z);
             if (surface.getType() == Material.WATER || surface.getType() == Material.WATER_CAULDRON) {
                 water = true;
             }
         }
 
+        int walkable = region.cells.size();
+        double skyFraction = walkable == 0 ? 0.0 : skyAccessible / (double) walkable;
+        boolean wellSunlit = config.isHusbandrySunlightBoostEnabled()
+            && skyFraction >= config.husbandrySunlightBoostThreshold();
+
         Map<org.bukkit.entity.EntityType, Integer> counts = countAnimals(world, region);
         int stagger = Math.abs(animal.getUniqueId().hashCode() % STAGGER_TICKS);
-        return new PastureCacheEntry(region.cells.size(), good, bad, water, counts, now, stagger);
+        return new PastureCacheEntry(
+            walkable,
+            good,
+            bad,
+            water,
+            skyFraction,
+            wellSunlit,
+            counts,
+            now,
+            stagger
+        );
     }
 
     private @NotNull Map<org.bukkit.entity.EntityType, Integer> countAnimals(
@@ -314,9 +361,16 @@ public final class PastureScoreService {
         }
     }
 
-    public record PastureScore(@NotNull Tier tier, int walkableBlocks, int animalCount, int minBlocks, boolean water) {
+    public record PastureScore(
+        @NotNull Tier tier,
+        int walkableBlocks,
+        int animalCount,
+        int minBlocks,
+        boolean water,
+        boolean wellSunlit
+    ) {
         public static @NotNull PastureScore fallback() {
-            return new PastureScore(Tier.FAIR, 1, 1, 1, false);
+            return new PastureScore(Tier.FAIR, 1, 1, 1, false, false);
         }
     }
 
@@ -389,6 +443,8 @@ public final class PastureScoreService {
         final int goodFloors;
         final int badFloors;
         final boolean water;
+        final double skyFraction;
+        final boolean wellSunlit;
         final Map<org.bukkit.entity.EntityType, Integer> animalCounts;
         final long timestamp;
         final int stagger;
@@ -398,6 +454,8 @@ public final class PastureScoreService {
             int goodFloors,
             int badFloors,
             boolean water,
+            double skyFraction,
+            boolean wellSunlit,
             Map<org.bukkit.entity.EntityType, Integer> animalCounts,
             long timestamp,
             int stagger
@@ -406,6 +464,8 @@ public final class PastureScoreService {
             this.goodFloors = goodFloors;
             this.badFloors = badFloors;
             this.water = water;
+            this.skyFraction = skyFraction;
+            this.wellSunlit = wellSunlit;
             this.animalCounts = animalCounts;
             this.timestamp = timestamp;
             this.stagger = stagger;

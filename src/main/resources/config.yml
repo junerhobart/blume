@@ -1,6 +1,6 @@
 resource-pack:
   enabled: true
-  url: "https://github.com/${github-repo}/releases/download/v${version}/blume-pack.zip"
+  url: ""
   builtin-host: false
   host: ""
   port: 8765
@@ -130,9 +130,14 @@ qol:
     rebuild-wither: true
   desire-paths:
     enabled: true
-    walks-to-trample: 8
-    walks-to-worn: 16
-    walks-to-path: 24
+    walks-to-trample: 4
+    walks-to-worn: 8
+    walks-to-path: 12
+    erosion:
+      enabled: true
+      timeout-mc-days:
+        trampled: 5
+        worn: 8
     worn-weights:
       dirt: 75
       coarse_dirt: 20
@@ -187,6 +192,9 @@ ecology:
     max-per-chunk: 16
     spawn-chance: 0.35
     patches-per-chunk: 3
+    spread-enabled: true
+    spread-chance: 0.05
+    spread-into-grass-chance: 0.02
     biome-allowlist:
       - plains
       - forest
@@ -198,16 +206,13 @@ ecology:
       - river
   natural-grass:
     enabled: true
-    tick-interval-seconds: 10
-    short-grass-chance: 0.25
-    tall-grass-chance: 0.12
+    short-grass-chance: 0.05
+    tall-grass-chance: 0.03
     invade-farmland: false
     invade-farmland-chance: 0.08
   pollination:
     # Crop boosts never clear bee nectar; vanilla hive deposit handles honey.
     enabled: true
-    tick-interval-seconds: 5
-    crop-cooldown-seconds: 20
     flower-spread-chance: 0.05
   husbandry:
     enabled: true

@@ -29,6 +29,9 @@ jobs:
       - name: Build plugin and resource packs
         run: sh scripts/build.sh -B package -DskipTests
 
+      - name: Assemble docs site
+        run: sh scripts/assemble-docs-site.sh
+
       - name: Docs static checks
         run: |
           set -eu
@@ -39,7 +42,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: target/docs-site
 
   deploy:
     needs: build

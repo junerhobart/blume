@@ -1,29 +1,46 @@
 package io.blume.qol.paths;
 
+import io.blume.BlumePlugin;
+import io.blume.ecology.EcologyKeys;
 import io.blume.qol.QolConfig;
 import io.blume.qol.QolKeys;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class DesirePathService {
 
-    private static final int STAGE_GRASS = 0;
-    private static final int STAGE_TRAMPLED = 1;
-    private static final int STAGE_WORN = 2;
+    private static final Set<Material> TRAMPLE_VEGETATION = Set.of(
+        Material.SHORT_GRASS,
+        Material.TALL_GRASS,
+        Material.FERN,
+        Material.LARGE_FERN,
+        Material.DEAD_BUSH,
+        Material.WHEAT,
+        Material.CARROTS,
+        Material.POTATOES,
+        Material.BEETROOTS
+    );
 
     private final QolConfig config;
     private final QolKeys keys;
+    private final EcologyKeys ecologyKeys;
 
-    public DesirePathService(@NotNull QolConfig config, @NotNull QolKeys keys) {
+    public DesirePathService(@NotNull BlumePlugin plugin, @NotNull QolConfig config, @NotNull QolKeys keys) {
         this.config = config;
         this.keys = keys;
+        this.ecologyKeys = new EcologyKeys(plugin);
     }
 
     public void recordWalk(@NotNull Block groundBlock) {
@@ -32,45 +49,90 @@ public final class DesirePathService {
             return;
         }
 
-        PathState state = readState(groundBlock);
+        long now = groundBlock.getWorld().getFullTime();
+        DesirePathEngine.DesirePathRules rules = DesirePathEngine.rulesFrom(config);
+
+        DesirePathEngine.PathState state = readState(groundBlock);
         if (state == null) {
             if (type != Material.GRASS_BLOCK) {
                 return;
             }
-            state = new PathState(STAGE_GRASS, 0);
-        } else if (state.stage() == STAGE_WORN && !isWornMaterial(type)) {
+            state = DesirePathEngine.PathState.freshGrass();
+        } else if (state.stage() == DesirePathEngine.STAGE_WORN && type == Material.GRASS_BLOCK) {
+            state = new DesirePathEngine.PathState(
+                DesirePathEngine.STAGE_TRAMPLED,
+                state.walks(),
+                state.lastTouchedTick()
+            );
+        } else if (state.stage() == DesirePathEngine.STAGE_WORN && !isWornMaterial(type)) {
             return;
         }
 
-        int walks = state.walks() + 1;
-        int stage = state.stage();
+        DesirePathEngine.Outcome outcome = DesirePathEngine.recordWalk(state, rules, now);
+        applyOutcome(groundBlock, outcome);
+    }
 
-        if (stage == STAGE_GRASS) {
-            if (walks >= config.walksToTrample()) {
-                trampleVegetation(groundBlock);
-                writeState(groundBlock, STAGE_TRAMPLED, 0);
-                return;
+    public void decayChunk(@NotNull Chunk chunk) {
+        if (!config.isDesirePathDeErosionEnabled()) {
+            return;
+        }
+
+        long now = chunk.getWorld().getFullTime();
+        DesirePathEngine.DesirePathRules rules = DesirePathEngine.rulesFrom(config);
+        PersistentDataContainer pdc = chunk.getPersistentDataContainer();
+
+        for (NamespacedKey key : pdc.getKeys()) {
+            if (!keys.isDesirePathBlockKey(key)) {
+                continue;
             }
-            writeState(groundBlock, STAGE_GRASS, walks);
-            return;
-        }
-
-        if (stage == STAGE_TRAMPLED) {
-            if (walks >= config.walksToWorn()) {
-                Material worn = pickWornMaterial();
-                groundBlock.setType(worn, false);
-                writeState(groundBlock, STAGE_WORN, 0);
-                return;
+            int[] coords = keys.parseDesirePathCoords(key);
+            if (coords == null) {
+                continue;
             }
-            writeState(groundBlock, STAGE_TRAMPLED, walks);
-            return;
-        }
 
-        if (stage == STAGE_WORN && walks >= config.walksToPath()) {
-            groundBlock.setType(Material.DIRT_PATH, false);
-            clearState(groundBlock);
-        } else if (stage == STAGE_WORN) {
-            writeState(groundBlock, STAGE_WORN, walks);
+            Long packed = pdc.get(key, PersistentDataType.LONG);
+            if (packed == null) {
+                continue;
+            }
+
+            DesirePathEngine.PathState state = DesirePathEngine.unpack(packed);
+            if (state == null) {
+                continue;
+            }
+
+            Block block = chunk.getWorld().getBlockAt(coords[0], coords[1], coords[2]);
+            DesirePathEngine.Outcome outcome = DesirePathEngine.applyDeErosion(state, rules, now);
+            applyOutcome(block, outcome);
+        }
+    }
+
+    void applyOutcome(@NotNull Block block, @NotNull DesirePathEngine.Outcome outcome) {
+        switch (outcome.effect()) {
+            case TRAMPLE_VEGETATION -> {
+                writeState(block, outcome.state());
+                trampleVegetation(block);
+            }
+            case BECOME_WORN -> {
+                writeState(block, outcome.state());
+                block.setType(pickWornMaterial(), false);
+            }
+            case BECOME_PATH -> {
+                clearState(block);
+                block.setType(Material.DIRT_PATH, false);
+            }
+            case REGRESS_TO_TRAMPLED -> {
+                writeState(block, outcome.state());
+                block.setType(Material.GRASS_BLOCK, false);
+            }
+            case REGRESS_TO_GRASS -> {
+                writeState(block, outcome.state());
+                block.setType(Material.GRASS_BLOCK, false);
+            }
+            case NONE -> {
+                if (outcome.state() != null) {
+                    writeState(block, outcome.state());
+                }
+            }
         }
     }
 
@@ -80,14 +142,24 @@ public final class DesirePathService {
         if (type.isAir()) {
             return;
         }
-        if (type == Material.SHORT_GRASS
-            || type == Material.TALL_GRASS
-            || type == Material.FERN
-            || type == Material.LARGE_FERN
-            || type == Material.DEAD_BUSH
-            || Tag.FLOWERS.isTagged(type)) {
+        if (TRAMPLE_VEGETATION.contains(type) || Tag.FLOWERS.isTagged(type)) {
+            clearWildCropMetadata(above);
             above.setType(Material.AIR, false);
         }
+    }
+
+    private void clearWildCropMetadata(@NotNull Block block) {
+        Chunk chunk = block.getChunk();
+        PersistentDataContainer pdc = chunk.getPersistentDataContainer();
+        if (!pdc.has(ecologyKeys.wildCrop(block), PersistentDataType.STRING)) {
+            return;
+        }
+        Integer count = pdc.get(ecologyKeys.wildCropCount(), PersistentDataType.INTEGER);
+        if (count != null && count > 0) {
+            pdc.set(ecologyKeys.wildCropCount(), PersistentDataType.INTEGER, count - 1);
+        }
+        pdc.remove(ecologyKeys.wildCrop(block));
+        pdc.remove(ecologyKeys.cropOrigin(block));
     }
 
     private Material pickWornMaterial() {
@@ -111,23 +183,21 @@ public final class DesirePathService {
         return type == Material.DIRT || type == Material.COARSE_DIRT || type == Material.GRAVEL;
     }
 
-    @org.jetbrains.annotations.Nullable
-    private PathState readState(Block block) {
+    @Nullable
+    private DesirePathEngine.PathState readState(Block block) {
         PersistentDataContainer pdc = block.getChunk().getPersistentDataContainer();
         Long packed = pdc.get(keys.desirePathBlock(block.getX(), block.getY(), block.getZ()), PersistentDataType.LONG);
         if (packed == null) {
             return null;
         }
-        int stage = (int) (packed >> 32);
-        int walks = (int) (packed & 0xFFFFFFFFL);
-        return new PathState(stage, walks);
+        return DesirePathEngine.unpack(packed);
     }
 
-    private void writeState(Block block, int stage, int walks) {
+    private void writeState(Block block, @NotNull DesirePathEngine.PathState state) {
         block.getChunk().getPersistentDataContainer().set(
             keys.desirePathBlock(block.getX(), block.getY(), block.getZ()),
             PersistentDataType.LONG,
-            ((long) stage << 32) | (walks & 0xFFFFFFFFL)
+            DesirePathEngine.pack(state)
         );
     }
 
@@ -136,6 +206,4 @@ public final class DesirePathService {
             keys.desirePathBlock(block.getX(), block.getY(), block.getZ())
         );
     }
-
-    private record PathState(int stage, int walks) {}
 }
