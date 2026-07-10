@@ -254,7 +254,6 @@ public final class PastureScoreService {
         int good = 0;
         int bad = 0;
         int skyAccessible = 0;
-        int sheltered = 0;
         boolean water = false;
         for (BlockPos cell : region.cells) {
             Block floor = world.getBlockAt(cell.x, cell.y - 1, cell.z);
@@ -265,11 +264,9 @@ public final class PastureScoreService {
                 bad++;
             }
             Block head = world.getBlockAt(cell.x, cell.y + 1, cell.z);
-            if (head.getLightFromSky() >= MIN_SKY_LIGHT && !isSheltered(world, cell)) {
+            boolean cellSheltered = isSheltered(world, cell);
+            if (head.getLightFromSky() >= MIN_SKY_LIGHT && !cellSheltered) {
                 skyAccessible++;
-            }
-            if (isSheltered(world, cell)) {
-                sheltered++;
             }
             Block surface = world.getBlockAt(cell.x, cell.y, cell.z);
             if (surface.getType() == Material.WATER || surface.getType() == Material.WATER_CAULDRON) {
@@ -291,7 +288,6 @@ public final class PastureScoreService {
             water,
             skyFraction,
             wellSunlit,
-            sheltered > 0,
             counts,
             now,
             stagger
@@ -449,7 +445,6 @@ public final class PastureScoreService {
         final boolean water;
         final double skyFraction;
         final boolean wellSunlit;
-        final boolean sheltered;
         final Map<org.bukkit.entity.EntityType, Integer> animalCounts;
         final long timestamp;
         final int stagger;
@@ -461,7 +456,6 @@ public final class PastureScoreService {
             boolean water,
             double skyFraction,
             boolean wellSunlit,
-            boolean sheltered,
             Map<org.bukkit.entity.EntityType, Integer> animalCounts,
             long timestamp,
             int stagger
@@ -472,7 +466,6 @@ public final class PastureScoreService {
             this.water = water;
             this.skyFraction = skyFraction;
             this.wellSunlit = wellSunlit;
-            this.sheltered = sheltered;
             this.animalCounts = animalCounts;
             this.timestamp = timestamp;
             this.stagger = stagger;

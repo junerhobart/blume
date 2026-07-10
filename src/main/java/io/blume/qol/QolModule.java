@@ -7,6 +7,7 @@ import io.blume.qol.creeper.CreeperRebuildService;
 import io.blume.qol.death.DeathDropListener;
 import io.blume.qol.doubledoors.DoubleDoorsListener;
 import io.blume.qol.harvest.HarvestListener;
+import io.blume.qol.paths.DesirePathDecayTask;
 import io.blume.qol.paths.DesirePathListener;
 import io.blume.qol.paths.DesirePathService;
 import io.blume.qol.paths.PathSpeedListener;
@@ -26,6 +27,8 @@ public final class QolModule {
     private final List<Listener> listeners = new ArrayList<>();
     private CreeperRebuildService creeperRebuildService;
     private DeathDropListener deathDropListener;
+    private DesirePathService desirePathService;
+    private DesirePathDecayTask desirePathDecayTask;
 
     public QolModule(@NotNull BlumePlugin plugin, @NotNull QolConfig config) {
         this.plugin = plugin;
@@ -48,13 +51,16 @@ public final class QolModule {
             deathDropListener.startCleanupTask();
         }
         if (config.isPathSpeedEnabled()) {
-            register(new PathSpeedListener(config));
+            register(new PathSpeedListener(plugin, config));
         }
         if (config.isHarvestReplantEnabled()) {
             register(new HarvestListener(config.isHarvestRequireEmptyHand()));
         }
         if (config.isDesirePathsEnabled()) {
-            register(new DesirePathListener(new DesirePathService(config, keys)));
+            desirePathService = new DesirePathService(plugin, config, keys);
+            register(new DesirePathListener(desirePathService));
+            desirePathDecayTask = new DesirePathDecayTask(plugin, desirePathService, config);
+            desirePathDecayTask.start();
         }
         if (config.isCreeperRebuildEnabled()) {
             creeperRebuildService = new CreeperRebuildService(plugin, config);
@@ -79,6 +85,11 @@ public final class QolModule {
             creeperRebuildService.shutdown();
             creeperRebuildService = null;
         }
+        if (desirePathDecayTask != null) {
+            desirePathDecayTask.stop();
+            desirePathDecayTask = null;
+        }
+        desirePathService = null;
     }
 
     public void reload(@NotNull QolConfig newConfig) {

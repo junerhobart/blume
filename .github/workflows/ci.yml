@@ -161,7 +161,7 @@ jobs:
 
           grep -q 'Done (' console.log
           grep -qi 'blume' console.log
-          ! grep -E 'SEVERE.*Blume|Could not load.*Blume|Error enabling plugin Blume|Disabling Blume' console.log \
-            || { grep -E 'SEVERE.*Blume|Could not load.*Blume|Error enabling plugin Blume|Disabling Blume' console.log; exit 1; }
+          ! grep -E 'SEVERE.*Blume|Could not load.*Blume|Error occurred while enabling Blume' console.log \
+            || { grep -E 'SEVERE.*Blume|Could not load.*Blume|Error occurred while enabling Blume' console.log; exit 1; }
 
           curl -fsS http://127.0.0.1:8765/blume-pack.zip | head -c 2 | grep -q '^PK'
