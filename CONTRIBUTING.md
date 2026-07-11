@@ -3,14 +3,8 @@
 ## Plugin
 
 ```bash
-git clone https://github.com/junerhobart/blume.git
-cd blume
 mvn package
 ```
-
-The plugin jar is written to `target/Blume-<version>.jar`. Resource packs are built to `target/` and embedded in the jar. Releases attach packs to Modrinth.
-
-Custom item textures: `docs/assets/textures/`
 
 ## Website
 
@@ -21,16 +15,14 @@ python3 -m http.server 8765
 
 # Local testing
 
-1. Run `'/Users/junehobart/Projects/blume/run/scripts/start.sh'`
-2. Join `localhost` and test.
+To start the server: 
 
-Note: you can also run `'/Users/junehobart/Projects/blume/run/scripts/purge.sh'` to remove server data (keeps important bits), `'/Users/junehobart/Projects/blume/run/scripts/sync-plugin.sh'`, and then in the server `/blume reload`.
+<sup>optionally add --pinned tag for my servers version.</sup>
+```bash
+run/scripts/start.sh
+```
 
-# Code guidelines
-
-- Keep names clear and diffs small.
-- Avoid unrelated refactors in the same PR.
-- Do not commit generated files unless the project already tracks them.
-- 'AI assisted' or 'vibecoded' commits are permitted, but I better not see a +200k line commit.
-
-You can dm me on discord `@junehobart` if you have any more questions.
+To remove files run:
+```bash
+run/scripts/purge.sh
+```

@@ -3,7 +3,6 @@ set -eu
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 RUN="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$RUN"
-mkdir -p plugins
 
 pinned=false
 if [ "${1:-}" = --pinned ]; then
@@ -17,6 +16,22 @@ else
   mc=$(sh "$ROOT/scripts/build.sh" -q help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
 fi
 
+needs_purge=false
+for jar in paper-*.jar; do
+  [ -e "$jar" ] || continue
+  case "$jar" in
+  paper-${mc}.jar) ;;
+  *) needs_purge=true; break ;;
+  esac
+done
+if $needs_purge; then
+  printf 'purging run/ (switching to %s)\n' "$mc"
+  sh "$(dirname "$0")/purge.sh"
+  cd "$RUN"
+fi
+
+mkdir -p plugins
+
 sed_inplace() {
   case $(uname -s) in
   Darwin) sed -i '' "$@" ;;
@@ -24,19 +39,78 @@ sed_inplace() {
   esac
 }
 
-fetch() {
-  test -f "$2" || curl -fsSL "$1" -o "$2"
+enable_plugin() {
+  file="$1"
+  url="$2"
+  version="$3"
+  rm -f "plugins/${file}.disabled"
+  curl -fsSL "$url" -o "plugins/$file"
+  printf 'ok: %s (%s)\n' "$file" "$version"
+}
+
+disable_plugin() {
+  file="$1"
+  reason="$2"
+  if [ -f "plugins/$file" ]; then
+    mv "plugins/$file" "plugins/${file}.disabled"
+  fi
+  printf 'skip: %s (%s)\n' "$file" "$reason"
+}
+
+fetch_modrinth() {
+  file="$1"
+  project="$2"
+  versions=$(curl -fsSL -G "https://api.modrinth.com/v2/project/${project}/version" \
+    --data-urlencode "game_versions=[\"${mc}\"]" \
+    --data-urlencode 'loaders=["paper","bukkit","spigot"]')
+  if [ "$(printf '%s' "$versions" | jq 'length')" -eq 0 ]; then
+    disable_plugin "$file" "no version for ${mc}"
+    return
+  fi
+  url=$(printf '%s' "$versions" | jq -r '
+    .[0] | (.files[] | select(.primary == true) | .url) // .files[0].url
+  ')
+  version=$(printf '%s' "$versions" | jq -r '.[0].version_number')
+  enable_plugin "$file" "$url" "$version"
+}
+
+fetch_geyser() {
+  file="$1"
+  project="$2"
+  platform="$3"
+  meta=$(curl -fsSL "https://download.geysermc.org/v2/projects/${project}/versions/latest/builds/latest")
+  version=$(printf '%s' "$meta" | jq -r '.version')
+  url="https://download.geysermc.org/v2/projects/${project}/versions/latest/builds/latest/downloads/${platform}"
+  enable_plugin "$file" "$url" "$version"
 }
 
 paper_url=$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/${mc}/builds" \
   | jq -r '.[-1].downloads["server:default"].url')
-fetch "$paper_url" "paper-${mc}.jar"
-fetch 'https://cdn.modrinth.com/data/P1OZGk5p/versions/4JQUNqJk/ViaVersion-5.10.1-SNAPSHOT.jar' plugins/ViaVersion.jar
-fetch 'https://cdn.modrinth.com/data/NpvuJQoq/versions/gsSGwSIA/ViaBackwards-5.10.1-SNAPSHOT.jar' plugins/ViaBackwards.jar
-fetch 'https://cdn.modrinth.com/data/FIlZB9L0/versions/Ufl71nST/Terra-bukkit-6.6.6-BETA%2B451683aff-shaded.jar' plugins/Terra.jar
-fetch 'https://cdn.modrinth.com/data/Vebnzrzj/versions/MBSY8toc/LuckPerms-Bukkit-5.5.53.jar' plugins/LuckPerms.jar
-fetch 'https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot' plugins/Geyser-Spigot.jar
-fetch 'https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot' plugins/floodgate-spigot.jar
+curl -fsSL "$paper_url" -o "paper-${mc}.jar"
+
+fetch_modrinth ViaVersion.jar P1OZGk5p
+fetch_modrinth ViaBackwards.jar NpvuJQoq
+fetch_modrinth Terra.jar FIlZB9L0
+fetch_modrinth LuckPerms.jar Vebnzrzj
+fetch_geyser Geyser-Spigot.jar geyser spigot
+fetch_geyser floodgate-spigot.jar floodgate spigot
+
+patch_bukkit_terra() {
+  sed '/^worlds:/,$d' bukkit.yml > bukkit.yml.tmp
+  if [ -f plugins/Terra.jar ]; then
+    cat >> bukkit.yml.tmp <<'EOF'
+worlds:
+  world:
+    generator: Terra:OVERWORLD
+EOF
+  else
+    cat >> bukkit.yml.tmp <<'EOF'
+worlds: {}
+EOF
+  fi
+  mv bukkit.yml.tmp bukkit.yml
+}
+patch_bukkit_terra
 
 sh "$ROOT/scripts/build.sh" -q clean package -Dminecraft.version="$mc"
 version=$(sh "$ROOT/scripts/build.sh" -q help:evaluate -Dexpression=project.version -DforceStdout)
