@@ -14,8 +14,8 @@ public final class AdminConfig {
     private static final String DEFAULT_COMMAND_FORMAT =
         "<gray>[Cmd]</gray> <white>{player}</white>: <yellow>{command}</yellow>";
     private static final String DEFAULT_GRAYLIST_JOIN_MESSAGE =
-        "<yellow>You are graylisted.</yellow> You need to be vouched for by another member. "
-            + "They can do this by typing <white>/vouch {username}</white>.";
+        "<yellow>You are graylisted.</yellow> A verified member must vouch for you before you can "
+            + "interact with the world. They can run <white>/vouch {username}</white>.";
 
     private final boolean graylistEnabled;
     private final boolean graylistJoinMessageEnabled;

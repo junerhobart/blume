@@ -5,7 +5,7 @@ resource-pack:
   host: ""
   port: 8765
   required: true
-  prompt: "<green>Blume</green> uses a resource pack for custom items. Please accept."
+  prompt: "<green>Blume</green> uses a resource pack for custom items. Please accept to see them in-game."
   bedrock:
     enabled: true
 
@@ -18,7 +18,7 @@ admin:
     enabled: true
     join-message:
       enabled: true
-      text: "<yellow>You are graylisted.</yellow> You need to be vouched for by another member. They can do this by typing <white>/vouch {username}</white>."
+      text: "<yellow>You are graylisted.</yellow> A verified member must vouch for you before you can interact with the world. They can run <white>/vouch {username}</white>."
   command-broadcast:
     enabled: true
     format: "<gray>[Cmd]</gray> <white>{player}</white>: <yellow>{command}</yellow>"
@@ -114,8 +114,8 @@ admin:
       - redo
       - cmi
   luckperms:
-    # Optional: add vouched players to a LuckPerms group. Requires the LuckPerms plugin.
-    # Setup: /lp creategroup verified  then set verified-group below  then set enabled: true
+    # luckperms hook — adds vouched players to a group. needs LuckPerms installed.
+    # setup: /lp creategroup verified, set verified-group below, then enabled: true
     enabled: false
     verified-group: ""
 

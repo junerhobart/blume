@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 public final class BlumeConfig {
 
     private static final String DEFAULT_PROMPT =
-        "<green>Blume</green> uses a resource pack for custom items. Please accept.";
+        "<green>Blume</green> uses a resource pack for custom items. Please accept to see them in-game.";
     private static final int DEFAULT_PACK_PORT = 8765;
 
     private final boolean resourcePackEnabled;
