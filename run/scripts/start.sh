@@ -4,17 +4,7 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 RUN="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$RUN"
 
-pinned=false
-if [ "${1:-}" = --pinned ]; then
-  pinned=true
-  shift
-fi
-
-if $pinned; then
-  mc=$(sh "$ROOT/scripts/build.sh" -q help:evaluate -Dexpression=minecraft.version.pinned -DforceStdout)
-else
-  mc=$(sh "$ROOT/scripts/build.sh" -q help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
-fi
+mc=$(mvn -q -f "$ROOT/pom.xml" help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
 
 needs_purge=false
 for jar in paper-*.jar; do
@@ -112,8 +102,10 @@ EOF
 }
 patch_bukkit_terra
 
-sh "$ROOT/scripts/build.sh" -q clean package -Dminecraft.version="$mc"
-version=$(sh "$ROOT/scripts/build.sh" -q help:evaluate -Dexpression=project.version -DforceStdout)
+revision=$(git -C "$ROOT" describe --tags --always 2>/dev/null | sed 's/^v//')
+revision=${revision:-0.0.0-dev}
+mvn -q -f "$ROOT/pom.xml" -Drevision="$revision" clean package -Dminecraft.version="$mc"
+version=$(mvn -q -f "$ROOT/pom.xml" -Drevision="$revision" help:evaluate -Dexpression=project.version -DforceStdout)
 cp "$ROOT/target/Blume-${version}.jar" plugins/Blume.jar
 
 mkdir -p plugins/Blume

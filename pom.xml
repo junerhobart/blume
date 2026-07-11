@@ -20,7 +20,7 @@
     </licenses>
 
     <properties>
-        <!-- Overridden by scripts/build.sh via -Drevision; fallback when git is unavailable -->
+        <!-- Overridden via -Drevision; fallback when git is unavailable -->
         <revision>0.0.0-dev</revision>
         <java.version>21</java.version>
         <minecraft.version.pinned>1.21.8</minecraft.version.pinned>

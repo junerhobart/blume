@@ -26,11 +26,18 @@ jobs:
           java-version: "21"
           cache: maven
 
+      - name: Revision
+        id: revision
+        run: echo "revision=$(git describe --tags --always | sed 's/^v//')" >> "$GITHUB_OUTPUT"
+
       - name: Build plugin and resource packs
-        run: sh scripts/build.sh -B package -DskipTests
+        run: mvn -B -Drevision=${{ steps.revision.outputs.revision }} package -DskipTests
 
       - name: Assemble docs site
-        run: sh scripts/assemble-docs-site.sh
+        run: |
+          rm -rf target/docs-site && mkdir -p target/docs-site
+          cp -R docs/. target/docs-site/
+          cp -R resourcepack target/docs-site/resourcepack
 
       - name: Docs static checks
         run: |

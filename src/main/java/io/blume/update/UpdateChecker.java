@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 public final class UpdateChecker {
 
-    private static final Pattern GITHUB_TAG = Pattern.compile("\"name\"\\s*:\\s*\"([^\"]+)\"");
+    private static final Pattern GITHUB_RELEASE = Pattern.compile("\"tag_name\"\\s*:\\s*\"([^\"]+)\"");
 
     private static final HttpClient HTTP = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(5))
@@ -61,14 +61,14 @@ public final class UpdateChecker {
         if (repo.isBlank()) {
             return null;
         }
-        return fetchGitHubTag(repo, userAgentVersion);
+        return fetchGitHubLatestRelease(repo, userAgentVersion);
     }
 
-    private static @Nullable LatestRelease fetchGitHubTag(
+    private static @Nullable LatestRelease fetchGitHubLatestRelease(
         @NotNull String repo,
         @NotNull String userAgentVersion
     ) {
-        String url = "https://api.github.com/repos/" + repo + "/tags";
+        String url = "https://api.github.com/repos/" + repo + "/releases/latest";
         try {
             HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .timeout(Duration.ofSeconds(8))
@@ -80,7 +80,7 @@ public final class UpdateChecker {
             if (response.statusCode() != 200) {
                 return null;
             }
-            Matcher matcher = GITHUB_TAG.matcher(response.body());
+            Matcher matcher = GITHUB_RELEASE.matcher(response.body());
             if (matcher.find()) {
                 String tag = matcher.group(1);
                 String version = VersionCompare.stripPrefix(tag);
