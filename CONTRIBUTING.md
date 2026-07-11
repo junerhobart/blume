@@ -35,22 +35,7 @@ run/scripts/purge.sh
 
 # Releasing
 
-Squash merge PRs to `main`. The squash commit title sets the release type and changelog section:
-
-| PR / squash title prefix | Release label | Changelog section |
-|--------------------------|---------------|-------------------|
-| `Release:` | RELEASE | Features |
-| `Patch:` | PATCH | Improvements |
-| `Hotfix:` | HOTFIX | Fixes |
-| `feature:` / `feat:` | (from HEAD at tag time) | Features |
-| `fix:` | (from HEAD at tag time) | Fixes |
-| `improve:` / `perf:` / `tweak:` | (from HEAD at tag time) | Improvements |
-
-Put player-facing bullets in the PR description; squash merge copies them into the commit body.
-
-`chore:`, `refactor:`, `ci:`, `docs:`, `test:`, `build:`, `style:`, and `merge:` commits are omitted from release notes.
-
-Tag `main` after merging:
+Merge to `main`, then tag:
 
 ```bash
 git tag v0.5.0
