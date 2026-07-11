@@ -19,14 +19,14 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
           cache: maven
 
       - name: Version from tag
         id: release
         run: |
           TAG="${GITHUB_REF#refs/tags/v}"
-          MC=$(mvn -q help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
+          MC=$(mvn -q help:evaluate -Dexpression=minecraft.version -DforceStdout)
           REVISION="${TAG}"
           PRERELEASE=false
           case "$TAG" in
@@ -49,6 +49,8 @@ jobs:
           else
             git log --format='- %s' > changelog.txt
           fi
+          printf -- '- Minecraft 1.21.x is deprecated and no longer receives Blume updates. This build requires Paper 26.2 and Java 25.\n' > changelog.txt.tmp
+          cat changelog.txt >> changelog.txt.tmp && mv changelog.txt.tmp changelog.txt
 
       - uses: softprops/action-gh-release@v2
         with:

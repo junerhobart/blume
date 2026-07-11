@@ -2,7 +2,7 @@ name: Blume
 version: '${project.version}'
 main: io.blume.BlumePlugin
 bootstrapper: io.blume.enchants.BlumeBootstrap
-api-version: '1.21'
+api-version: '26.2'
 description: a QOL focused plugin suite.
 authors:
   - junerhobart

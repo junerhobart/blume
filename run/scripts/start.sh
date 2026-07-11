@@ -4,7 +4,7 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 RUN="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$RUN"
 
-mc=$(mvn -q -f "$ROOT/pom.xml" help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
+mc=$(mvn -q -f "$ROOT/pom.xml" help:evaluate -Dexpression=minecraft.version -DforceStdout)
 
 needs_purge=false
 for jar in paper-*.jar; do
@@ -75,7 +75,7 @@ fetch_geyser() {
 }
 
 paper_url=$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/${mc}/builds" \
-  | jq -r '.[-1].downloads["server:default"].url')
+  | jq -r 'sort_by(.downloads["server:default"].url | capture("-(?<n>[0-9]+)\\.jar$").n | tonumber) | last | .downloads["server:default"].url')
 curl -fsSL "$paper_url" -o "paper-${mc}.jar"
 
 fetch_modrinth ViaVersion.jar P1OZGk5p

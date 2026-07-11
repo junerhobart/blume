@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
           cache: maven
 
       - name: Revision
@@ -26,7 +26,7 @@ jobs:
       - name: MC version from pom
         id: versions
         run: |
-          latest=$(mvn -q -Drevision=${{ steps.revision.outputs.revision }} help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
+          latest=$(mvn -q -Drevision=${{ steps.revision.outputs.revision }} help:evaluate -Dexpression=minecraft.version -DforceStdout)
           echo "latest=${latest}" >> "$GITHUB_OUTPUT"
           echo "matrix=[\"${latest}\"]" >> "$GITHUB_OUTPUT"
 
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
           cache: maven
 
       - name: Revision
@@ -165,7 +165,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
 
       - name: Plugin load smoke
         run: |
@@ -177,7 +177,7 @@ jobs:
 
           mc='${{ matrix.minecraft_version }}'
           paper_url=$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/${mc}/builds" \
-            | jq -r '.[-1].downloads["server:default"].url')
+            | jq -r 'sort_by(.downloads["server:default"].url | capture("-(?<n>[0-9]+)\\.jar$").n | tonumber) | last | .downloads["server:default"].url')
           curl -fsSL -o "$work/paper.jar" "$paper_url"
 
           cp jar/Blume-*.jar "$work/plugins/Blume.jar"
