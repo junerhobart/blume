@@ -7,12 +7,8 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-pinned=$(sh "$ROOT/scripts/build.sh" -q help:evaluate -Dexpression=minecraft.version.pinned -DforceStdout)
-latest_tag="v${version}"
-pinned_tag="v${version}-${pinned}"
+tag="v${version}"
+git -C "$ROOT" tag "$tag"
 
-git -C "$ROOT" tag "$latest_tag"
-git -C "$ROOT" tag "$pinned_tag"
-
-printf '%s\n' "Created ${latest_tag} and ${pinned_tag}"
-printf '%s\n' "git push origin ${latest_tag} ${pinned_tag}"
+printf '%s\n' "Created ${tag}"
+printf '%s\n' "git push origin ${tag}"
