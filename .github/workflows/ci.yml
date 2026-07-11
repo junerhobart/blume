@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.versions.outputs.matrix }}
-      pinned: ${{ steps.versions.outputs.pinned }}
       latest: ${{ steps.versions.outputs.latest }}
     steps:
       - uses: actions/checkout@v4
@@ -20,14 +19,16 @@ jobs:
           java-version: "21"
           cache: maven
 
-      - name: MC versions from pom
+      - name: Revision
+        id: revision
+        run: echo "revision=$(git describe --tags --always | sed 's/^v//')" >> "$GITHUB_OUTPUT"
+
+      - name: MC version from pom
         id: versions
         run: |
-          pinned=$(sh scripts/build.sh -q help:evaluate -Dexpression=minecraft.version.pinned -DforceStdout)
-          latest=$(sh scripts/build.sh -q help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
-          echo "pinned=${pinned}" >> "$GITHUB_OUTPUT"
+          latest=$(mvn -q -Drevision=${{ steps.revision.outputs.revision }} help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
           echo "latest=${latest}" >> "$GITHUB_OUTPUT"
-          echo "matrix=[\"${pinned}\",\"${latest}\"]" >> "$GITHUB_OUTPUT"
+          echo "matrix=[\"${latest}\"]" >> "$GITHUB_OUTPUT"
 
   build:
     needs: setup
@@ -46,13 +47,17 @@ jobs:
           java-version: "21"
           cache: maven
 
+      - name: Revision
+        id: revision
+        run: echo "revision=$(git describe --tags --always | sed 's/^v//')" >> "$GITHUB_OUTPUT"
+
       - name: Build plugin
-        run: sh scripts/build.sh -B package -DskipTests -Dminecraft.version=${{ matrix.minecraft_version }}
+        run: mvn -B -Drevision=${{ steps.revision.outputs.revision }} package -DskipTests -Dminecraft.version=${{ matrix.minecraft_version }}
 
       - name: Artifact contract
         run: |
           set -eu
-          version=$(sh scripts/build.sh -q help:evaluate -Dexpression=project.version -DforceStdout)
+          version=$(mvn -q -Drevision=${{ steps.revision.outputs.revision }} help:evaluate -Dexpression=project.version -DforceStdout)
           jar="target/Blume-${version}.jar"
 
           test -f "$jar"
@@ -87,7 +92,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Assemble docs site
-        run: sh scripts/assemble-docs-site.sh
+        run: |
+          rm -rf target/docs-site && mkdir -p target/docs-site
+          cp -R docs/. target/docs-site/
+          cp -R resourcepack target/docs-site/resourcepack
 
       - name: Docs static checks
         run: |

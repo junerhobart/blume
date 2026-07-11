@@ -18,6 +18,7 @@ import io.blume.qol.QolModule;
 import io.blume.resourcepack.JavaResourcePackSource;
 import io.blume.resourcepack.ResourcePackService;
 import io.blume.update.UpdateChecker;
+import io.blume.update.VersionCompare;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
@@ -72,6 +73,11 @@ public final class BlumePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, resourcePackService), this);
         getServer().getScheduler().runTaskLater(this, this::sendResourcePackToOnlinePlayers, 1L);
         UpdateChecker.checkAsync(this, blumeConfig);
+        if (VersionCompare.isBeta(getPluginMeta().getVersion())) {
+            getLogger().warning(
+                "[Blume] Experimental beta build (" + getPluginMeta().getVersion() + "). Expect bugs; not for production."
+            );
+        }
 
         qolModule = new QolModule(this, qolConfig);
         qolModule.enable();

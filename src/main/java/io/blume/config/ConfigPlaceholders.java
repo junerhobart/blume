@@ -13,8 +13,8 @@ public final class ConfigPlaceholders {
         "https://github\\.com/([^/]+/[^/]+)/releases/download/v[^/]+/blume-pack\\.zip"
     );
 
-    private static final Pattern PINNED_RELEASE_SUFFIX = Pattern.compile(
-        "^(\\d+\\.\\d+\\.\\d+)-(\\d+\\.\\d+(?:\\.\\d+)?)$"
+    private static final Pattern BETA_RELEASE = Pattern.compile(
+        "^(\\d+\\.\\d+\\.\\d+)-beta\\.\\d+$"
     );
 
     private ConfigPlaceholders() {
@@ -27,7 +27,7 @@ public final class ConfigPlaceholders {
         if (!version.contains("-")) {
             return true;
         }
-        return PINNED_RELEASE_SUFFIX.matcher(version).matches();
+        return BETA_RELEASE.matcher(version).matches();
     }
 
     static @NotNull String releaseTag(@NotNull String version) {
@@ -72,8 +72,8 @@ public final class ConfigPlaceholders {
         if (!isReleaseVersion("0.4.3")) {
             throw new AssertionError("expected release version 0.4.3");
         }
-        if (!isReleaseVersion("0.4.6-1.21.8")) {
-            throw new AssertionError("pinned release tag must be treated as release");
+        if (!isReleaseVersion("0.5.0-beta.1")) {
+            throw new AssertionError("beta release must be treated as release");
         }
         if (isReleaseVersion("0.4.3-2-gabc")) {
             throw new AssertionError("dirty version must not be treated as release");
@@ -88,9 +88,9 @@ public final class ConfigPlaceholders {
             .equals("https://github.com/junerhobart/blume/releases/download/v0.4.3/blume-pack.zip")) {
             throw new AssertionError("unexpected pack url for 0.4.3");
         }
-        String pinned = resolvePackUrl(PACK_URL_TEMPLATE, "0.4.6-1.21.8", "junerhobart/blume");
-        if (!pinned.equals("https://github.com/junerhobart/blume/releases/download/v0.4.6-1.21.8/blume-pack.zip")) {
-            throw new AssertionError("unexpected pinned pack url: " + pinned);
+        String beta = resolvePackUrl(PACK_URL_TEMPLATE, "0.5.0-beta.1", "junerhobart/blume");
+        if (!beta.equals("https://github.com/junerhobart/blume/releases/download/v0.5.0-beta.1/blume-pack.zip")) {
+            throw new AssertionError("unexpected beta pack url: " + beta);
         }
     }
 

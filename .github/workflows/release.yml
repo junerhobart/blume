@@ -26,69 +26,199 @@ jobs:
         id: release
         run: |
           TAG="${GITHUB_REF#refs/tags/v}"
-          PINNED=$(mvn -q help:evaluate -Dexpression=minecraft.version.pinned -DforceStdout)
-          LATEST=$(mvn -q help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
-          SUFFIX="-${PINNED}"
-
-          case "$TAG" in
-            *"${SUFFIX}") MC="${PINNED}" ;;
-            *) MC="${LATEST}" ;;
-          esac
+          MC=$(mvn -q help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
           REVISION="${TAG}"
+          PRERELEASE=false
+          case "$TAG" in
+            *-beta*) PRERELEASE=true ;;
+          esac
 
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "revision=${REVISION}" >> "$GITHUB_OUTPUT"
           echo "minecraft_version=${MC}" >> "$GITHUB_OUTPUT"
+          echo "prerelease=${PRERELEASE}" >> "$GITHUB_OUTPUT"
 
       - name: Build
         run: mvn -B -Drevision=${{ steps.release.outputs.revision }} -Dminecraft.version=${{ steps.release.outputs.minecraft_version }} package
 
       - name: Changelog since last tag
+        id: changelog
         run: |
+          set -eu
+          TAG="${{ steps.release.outputs.tag }}"
+
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)
-          if [ -n "$PREV_TAG" ]; then
-            git log "${PREV_TAG}..HEAD" --format='- %s' > changelog.txt
-          else
-            git log --format='- %s' > changelog.txt
+          LOG_RANGE="${PREV_TAG:+${PREV_TAG}..HEAD}"
+
+          base_version() {
+            printf '%s' "$1" | sed 's/^v//; s/-.*//'
+          }
+
+          parse_parts() {
+            _bv=$(base_version "$1")
+            _maj=${_bv%%.*}
+            _rest=${_bv#*.}
+            _min=${_rest%%.*}
+            _patch=${_rest#*.}
+            if [ "$_patch" = "$_rest" ]; then _patch=0; fi
+            printf '%s %s %s' "$_maj" "$_min" "$_patch"
+          }
+
+          subject_prefix() {
+            printf '%s' "$1" | sed -n 's/^\([^:]*\):.*/\1/p' | tr '[:upper:]' '[:lower:]'
+          }
+
+          subject_body() {
+            printf '%s' "$1" | sed 's/^[^:]*:[[:space:]]*//'
+          }
+
+          infer_release_type() {
+            if [ -z "$PREV_TAG" ]; then
+              printf '%s\n' PATCH
+              return
+            fi
+            set -- $(parse_parts "$TAG")
+            _tmaj=$1 _tmin=$2 _tpatch=$3
+            set -- $(parse_parts "$PREV_TAG")
+            _pmaj=$1 _pmin=$2 _ppatch=$3
+            if [ "$_tmaj" -gt "$_pmaj" ] || { [ "$_tmaj" -eq "$_pmaj" ] && [ "$_tmin" -gt "$_pmin" ]; }; then
+              printf '%s\n' RELEASE
+            else
+              printf '%s\n' PATCH
+            fi
+          }
+
+          release_type_from_subject() {
+            case "$(subject_prefix "$1")" in
+              release) printf '%s\n' RELEASE ;;
+              patch) printf '%s\n' PATCH ;;
+              hotfix) printf '%s\n' HOTFIX ;;
+            esac
+          }
+
+          RELEASE_TYPE=""
+          case "$TAG" in
+            *-beta*) RELEASE_TYPE=BETA ;;
+          esac
+
+          HEAD_SUBJECT=$(git log -1 --format='%s')
+          if [ -z "$RELEASE_TYPE" ]; then
+            RELEASE_TYPE=$(release_type_from_subject "$HEAD_SUBJECT" || true)
           fi
+          if [ -z "$RELEASE_TYPE" ]; then
+            RELEASE_TYPE=$(infer_release_type)
+          fi
+
+          FEATURES=$(mktemp)
+          FIXES=$(mktemp)
+          IMPROVEMENTS=$(mktemp)
+          RAW=$(mktemp)
+          trap 'rm -f "$FEATURES" "$FIXES" "$IMPROVEMENTS" "$RAW"' EXIT
+
+          append_bullet() {
+            _section=$1
+            _line=$2
+            _line=$(printf '%s' "$_line" | sed 's/^[[:space:]]*[-*][[:space:]]*//; s/^[[:space:]]*//; s/[[:space:]]*$//')
+            [ -n "$_line" ] || return 0
+            case "$_section" in
+              features) printf '%s\n' "- ${_line}" >> "$FEATURES" ;;
+              fixes) printf '%s\n' "- ${_line}" >> "$FIXES" ;;
+              improvements) printf '%s\n' "- ${_line}" >> "$IMPROVEMENTS" ;;
+            esac
+          }
+
+          bucket_commit() {
+            _subject=$1
+            _body=$2
+            _prefix=$(subject_prefix "$_subject")
+            _summary=$(subject_body "$_subject")
+            _section=""
+            case "$_prefix" in
+              release|feature|feat) _section=features ;;
+              hotfix|fix) _section=fixes ;;
+              patch|improve|perf|tweak) _section=improvements ;;
+              *) return 0 ;;
+            esac
+            if [ -n "$_body" ]; then
+              _lines=$(mktemp)
+              printf '%s\n' "$_body" > "$_lines"
+              while IFS= read -r _line; do
+                append_bullet "$_section" "$_line"
+              done < "$_lines"
+              rm -f "$_lines"
+            elif [ -n "$_summary" ]; then
+              append_bullet "$_section" "$_summary"
+            fi
+          }
+
+          if [ -n "$LOG_RANGE" ]; then
+            git log "$LOG_RANGE" --format='---%n%s%n%b' > "$RAW"
+          else
+            git log --format='---%n%s%n%b' > "$RAW"
+          fi
+
+          _subject=""
+          _body=""
+          while IFS= read -r _line || [ -n "$_line" ]; do
+            case "$_line" in
+              ---)
+                if [ -n "$_subject" ]; then
+                  bucket_commit "$_subject" "$_body"
+                fi
+                _subject=""
+                _body=""
+                ;;
+              *)
+                if [ -z "$_subject" ]; then
+                  _subject=$_line
+                elif [ -z "$_body" ]; then
+                  _body=$_line
+                else
+                  _body="${_body}
+          $_line"
+                fi
+                ;;
+            esac
+          done < "$RAW"
+          if [ -n "$_subject" ]; then
+            bucket_commit "$_subject" "$_body"
+          fi
+
+          {
+            printf '## %s %s\n\n' "$RELEASE_TYPE" "$TAG"
+            if [ -s "$FEATURES" ]; then
+              printf '### Features\n'
+              cat "$FEATURES"
+              printf '\n'
+            fi
+            if [ -s "$FIXES" ]; then
+              printf '### Fixes\n'
+              cat "$FIXES"
+              printf '\n'
+            fi
+            if [ -s "$IMPROVEMENTS" ]; then
+              printf '### Improvements\n'
+              cat "$IMPROVEMENTS"
+              printf '\n'
+            fi
+            if [ ! -s "$FEATURES" ] && [ ! -s "$FIXES" ] && [ ! -s "$IMPROVEMENTS" ]; then
+              printf 'No player-facing changes in this release.\n'
+            fi
+          } > changelog.txt
+
+          echo "release_type=${RELEASE_TYPE}" >> "$GITHUB_OUTPUT"
 
       - uses: softprops/action-gh-release@v2
         with:
+          name: "[${{ steps.changelog.outputs.release_type }}] [${{ steps.release.outputs.minecraft_version }}] Blume v${{ steps.release.outputs.tag }}"
           body_path: changelog.txt
           generate_release_notes: false
+          prerelease: ${{ steps.release.outputs.prerelease == 'true' }}
           files: |
             target/Blume-${{ steps.release.outputs.revision }}.jar
             target/blume-pack.zip
             target/blume-bedrock-pack.zip
             target/blume-geyser-mappings.json
-
-      - name: Sync README to Modrinth body
-        env:
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-          MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
-        run: |
-          BODY_JSON=$(jq -n --rawfile body README.md '{body: $body}')
-          curl -fsSL -X PATCH "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}" \
-            -H "Authorization: ${MODRINTH_TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d "$BODY_JSON"
-
-      - name: Sync GitHub About to Modrinth description
-        env:
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-          MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          SUMMARY=$(gh api "repos/${GITHUB_REPOSITORY}" --jq .description | head -c 256)
-          if [ -z "$SUMMARY" ]; then
-            echo "GitHub repo description is empty; set About in repo settings before syncing"
-            exit 1
-          fi
-
-          curl -fsSL -X PATCH "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}" \
-            -H "Authorization: ${MODRINTH_TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n --arg d "$SUMMARY" '{description: $d}')"
 
       - name: Publish to Modrinth
         env:
@@ -97,13 +227,24 @@ jobs:
           VERSION: ${{ steps.release.outputs.tag }}
           REVISION: ${{ steps.release.outputs.revision }}
           MC_VERSION: ${{ steps.release.outputs.minecraft_version }}
+          PRERELEASE: ${{ steps.release.outputs.prerelease }}
         run: |
+          if [ "$PRERELEASE" = true ]; then
+            version_type=beta
+            featured=false
+          else
+            version_type=release
+            featured=true
+          fi
+
           JSON=$(jq -n \
             --arg name "Blume ${VERSION}" \
             --arg version_number "$VERSION" \
             --arg changelog "$(cat changelog.txt)" \
             --arg project_id "$MODRINTH_PROJECT_ID" \
             --arg mc_version "$MC_VERSION" \
+            --arg version_type "$version_type" \
+            --argjson featured "$featured" \
             --argjson loaders '["paper"]' \
             '{
               name: $name,
@@ -111,9 +252,9 @@ jobs:
               changelog: $changelog,
               dependencies: [],
               game_versions: [$mc_version],
-              version_type: "release",
+              version_type: $version_type,
               loaders: $loaders,
-              featured: true,
+              featured: $featured,
               project_id: $project_id,
               file_parts: ["jar"],
               primary_file: "jar",

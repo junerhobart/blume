@@ -1,16 +1,16 @@
-# Building
+# Contributing
 
 ## Plugin
 
 ```bash
-git clone https://github.com/junerhobart/blume.git
-cd blume
 mvn package
 ```
 
-The plugin jar is written to `target/Blume-<version>.jar`. Resource packs are built to `target/` and embedded in the jar. Releases attach packs to Modrinth.
+For tagged releases, pass the revision:
 
-Custom item textures: `docs/assets/textures/`
+```bash
+mvn -Drevision=$(git describe --tags --always | sed 's/^v//') package
+```
 
 ## Website
 
@@ -21,16 +21,47 @@ python3 -m http.server 8765
 
 # Local testing
 
-1. Run `'/Users/junehobart/Projects/blume/run/scripts/start.sh'`
-2. Join `localhost` and test.
+Start the server:
 
-Note: you can also run `'/Users/junehobart/Projects/blume/run/scripts/purge.sh'` to remove server data (keeps important bits), `'/Users/junehobart/Projects/blume/run/scripts/sync-plugin.sh'`, and then in the server `/blume reload`.
+```bash
+run/scripts/start.sh
+```
 
-# Code guidelines
+Remove server data:
 
-- Keep names clear and diffs small.
-- Avoid unrelated refactors in the same PR.
-- Do not commit generated files unless the project already tracks them.
-- 'AI assisted' or 'vibecoded' commits are permitted, but I better not see a +200k line commit.
+```bash
+run/scripts/purge.sh
+```
 
-You can dm me on discord `@junehobart` if you have any more questions.
+# Releasing
+
+Squash merge PRs to `main`. The squash commit title sets the release type and changelog section:
+
+| PR / squash title prefix | Release label | Changelog section |
+|--------------------------|---------------|-------------------|
+| `Release:` | RELEASE | Features |
+| `Patch:` | PATCH | Improvements |
+| `Hotfix:` | HOTFIX | Fixes |
+| `feature:` / `feat:` | (from HEAD at tag time) | Features |
+| `fix:` | (from HEAD at tag time) | Fixes |
+| `improve:` / `perf:` / `tweak:` | (from HEAD at tag time) | Improvements |
+
+Put player-facing bullets in the PR description; squash merge copies them into the commit body.
+
+`chore:`, `refactor:`, `ci:`, `docs:`, `test:`, `build:`, `style:`, and `merge:` commits are omitted from release notes.
+
+Tag `main` after merging:
+
+```bash
+git tag v0.5.0
+git push origin v0.5.0
+```
+
+Beta:
+
+```bash
+git tag v0.5.0-beta.1
+git push origin v0.5.0-beta.1
+```
+
+`release.yml` builds the jar, publishes the GitHub Release (jar + packs), and uploads the jar to Modrinth.
