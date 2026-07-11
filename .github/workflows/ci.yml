@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.versions.outputs.matrix }}
-      pinned: ${{ steps.versions.outputs.pinned }}
       latest: ${{ steps.versions.outputs.latest }}
     steps:
       - uses: actions/checkout@v4
@@ -24,14 +23,12 @@ jobs:
         id: revision
         run: echo "revision=$(git describe --tags --always | sed 's/^v//')" >> "$GITHUB_OUTPUT"
 
-      - name: MC versions from pom
+      - name: MC version from pom
         id: versions
         run: |
-          pinned=$(mvn -q -Drevision=${{ steps.revision.outputs.revision }} help:evaluate -Dexpression=minecraft.version.pinned -DforceStdout)
           latest=$(mvn -q -Drevision=${{ steps.revision.outputs.revision }} help:evaluate -Dexpression=minecraft.version.latest -DforceStdout)
-          echo "pinned=${pinned}" >> "$GITHUB_OUTPUT"
           echo "latest=${latest}" >> "$GITHUB_OUTPUT"
-          echo "matrix=[\"${pinned}\",\"${latest}\"]" >> "$GITHUB_OUTPUT"
+          echo "matrix=[\"${latest}\"]" >> "$GITHUB_OUTPUT"
 
   build:
     needs: setup
