@@ -17,7 +17,6 @@ import io.blume.qol.QolConfig;
 import io.blume.qol.QolModule;
 import io.blume.resourcepack.JavaResourcePackSource;
 import io.blume.resourcepack.ResourcePackService;
-import io.blume.update.UpdateChecker;
 import io.blume.update.VersionCompare;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -72,7 +71,10 @@ public final class BlumePlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, resourcePackService), this);
         getServer().getScheduler().runTaskLater(this, this::sendResourcePackToOnlinePlayers, 1L);
-        UpdateChecker.checkAsync(this, blumeConfig);
+        getLogger().warning(
+            "[Blume] Minecraft 1.21.x is deprecated and will not receive further Blume updates. "
+                + "Newer Blume releases require Paper 26.2 and Java 25."
+        );
         if (VersionCompare.isBeta(getPluginMeta().getVersion())) {
             getLogger().warning(
                 "[Blume] Experimental beta build (" + getPluginMeta().getVersion() + "). Expect bugs; not for production."
