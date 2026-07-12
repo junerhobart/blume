@@ -3,6 +3,7 @@ package io.blume.enchants.sickle;
 import io.blume.enchants.BlumeEnchantments;
 import io.blume.enchants.EnchantChecks;
 import io.blume.enchants.EnchantsConfig;
+import io.blume.enchants.ManualBreak;
 import io.blume.qol.harvest.CropHarvest;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
@@ -69,9 +70,15 @@ public final class SickleListener implements Listener {
                     if (dxySq + dz * dz > radiusSq) {
                         continue;
                     }
+                    // Re-fetch each iteration: the sickle may break mid-harvest.
+                    ItemStack held = player.getInventory().getItemInMainHand();
+                    if (held.getType().isAir() || !ManualBreak.canBreakOneMore(player, held)) {
+                        return;
+                    }
                     Block block = world.getBlockAt(x, y, z);
-                    if (CropHarvest.isMatureCrop(block)) {
-                        CropHarvest.harvestAndReplant(player, block, tool);
+                    if (CropHarvest.isMatureCrop(block)
+                        && CropHarvest.harvestAndReplant(player, block, held)) {
+                        ManualBreak.damageTool(player, held);
                     }
                 }
             }

@@ -95,19 +95,14 @@ public final class AdminConfig {
     }
 
     private static @NotNull Set<String> parseBroadcastCommands(ConfigurationSection admin) {
-        Set<String> commands = new HashSet<>(defaultCheatCommands());
-
-        if (admin == null) {
-            return commands;
+        // Defaults apply only when the key is absent. An explicitly empty list
+        // means the admin wants no command broadcasts.
+        if (admin == null || !admin.contains("command-broadcast.commands")) {
+            return defaultCheatCommands();
         }
 
-        List<String> configured = admin.getStringList("command-broadcast.commands");
-        if (configured.isEmpty()) {
-            return commands;
-        }
-
-        commands.clear();
-        for (String command : configured) {
+        Set<String> commands = new HashSet<>();
+        for (String command : admin.getStringList("command-broadcast.commands")) {
             commands.add(normalizeCommandRoot(command));
         }
         return commands;

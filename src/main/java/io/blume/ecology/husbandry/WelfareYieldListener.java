@@ -234,12 +234,11 @@ public final class WelfareYieldListener implements Listener {
         setBreedCooldown(mother, cooldown);
     }
 
+    // For adult animals a positive age is the remaining breed cooldown in
+    // ticks (vanilla sets 6000 after breeding), so setAge is the real API.
     private void setBreedCooldown(@NotNull LivingEntity entity, int cooldown) {
-        try {
-            entity.getClass().getMethod("setBreedCooldown", int.class).invoke(entity, cooldown);
-        } catch (Exception ignored) {
-            // ponytail: Paper 1.21.8 doesn't expose this on the Bukkit interface;
-            // reflect into the implementation class so the feature still works at runtime.
+        if (entity instanceof Ageable ageable && ageable.isAdult()) {
+            ageable.setAge(cooldown);
         }
     }
 

@@ -20,19 +20,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "25"
-          cache: maven
-
-      - name: Revision
-        id: revision
-        run: echo "revision=$(git describe --tags --always | sed 's/^v//')" >> "$GITHUB_OUTPUT"
-
-      - name: Build plugin and resource packs
-        run: mvn -B -Drevision=${{ steps.revision.outputs.revision }} package -DskipTests
-
+      # The site is assembled from docs/ and resourcepack/ only; no Maven
+      # build output is deployed, so none is built here.
       - name: Assemble docs site
         run: |
           rm -rf target/docs-site && mkdir -p target/docs-site

@@ -1,6 +1,6 @@
 package io.blume.ecology;
 
-import org.bukkit.GameRule;
+import org.bukkit.GameRules;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +14,7 @@ public final class RandomTickPace {
     private RandomTickPace() {}
 
     public static int speed(@NotNull World world) {
-        Integer value = world.getGameRuleValue(GameRule.RANDOM_TICK_SPEED);
+        Integer value = world.getGameRuleValue(GameRules.RANDOM_TICK_SPEED);
         return value == null ? VANILLA_RANDOM_TICK_SPEED : value;
     }
 

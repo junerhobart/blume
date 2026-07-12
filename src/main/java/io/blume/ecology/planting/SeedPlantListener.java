@@ -1,5 +1,6 @@
 package io.blume.ecology.planting;
 
+import com.destroystokyo.paper.event.block.BlockDestroyEvent;
 import io.blume.BlumePlugin;
 import io.blume.ecology.EcologyConfig;
 import io.blume.ecology.harvest.CropOriginHelper;
@@ -15,6 +16,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -50,7 +54,9 @@ public final class SeedPlantListener implements Listener {
         this.originHelper = originHelper;
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    // ignoreCancelled: protection plugins (claims, WorldGuard) cancel the
+    // interact event; planting must respect that.
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
@@ -68,6 +74,13 @@ public final class SeedPlantListener implements Listener {
 
         ItemStack item = event.getItem();
         if (item == null || item.getType().isAir()) {
+            return;
+        }
+
+        // If the space above isn't plantable, don't cancel vanilla — otherwise
+        // the click becomes a silent no-op with the item stuck in hand.
+        Material above = clicked.getRelative(BlockFace.UP).getType();
+        if (!above.isAir() && above != Material.SHORT_GRASS) {
             return;
         }
 
@@ -94,6 +107,38 @@ public final class SeedPlantListener implements Listener {
         if (type == Material.POTATO) {
             cancelVanilla(event);
             plantCrop(player, clicked, Material.POTATOES, CropOriginHelper.POTATO, event.getHand());
+        }
+    }
+
+    // Origin PDC entries are written per planted crop; without cleanup on
+    // destruction they accumulate on the chunk forever.
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        clearOriginIfPresent(event.getBlock());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockDestroy(BlockDestroyEvent event) {
+        clearOriginIfPresent(event.getBlock());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        for (Block block : event.blockList()) {
+            clearOriginIfPresent(block);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        for (Block block : event.blockList()) {
+            clearOriginIfPresent(block);
+        }
+    }
+
+    private void clearOriginIfPresent(@NotNull Block block) {
+        if (originHelper.hasOrigin(block)) {
+            originHelper.clearOrigin(block);
         }
     }
 

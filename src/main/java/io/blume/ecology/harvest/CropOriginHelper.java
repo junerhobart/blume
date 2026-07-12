@@ -38,6 +38,21 @@ public final class CropOriginHelper {
         pdc(block).remove(keys.cropOrigin(block));
     }
 
+    // For code paths that remove a crop without firing a break event
+    // (e.g. harvest-replant breaking a non-replantable crop): clears origin
+    // plus any wild-crop entry, keeping the chunk's wild-crop count accurate.
+    public void clearBlockMetadata(@NotNull Block block) {
+        PersistentDataContainer pdc = pdc(block);
+        pdc.remove(keys.cropOrigin(block));
+        if (pdc.has(keys.wildCrop(block), PersistentDataType.STRING)) {
+            pdc.remove(keys.wildCrop(block));
+            Integer count = pdc.get(keys.wildCropCount(), PersistentDataType.INTEGER);
+            if (count != null && count > 0) {
+                pdc.set(keys.wildCropCount(), PersistentDataType.INTEGER, count - 1);
+            }
+        }
+    }
+
     private static @NotNull PersistentDataContainer pdc(@NotNull Block block) {
         return block.getChunk().getPersistentDataContainer();
     }

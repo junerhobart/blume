@@ -71,9 +71,8 @@ public final class DeathDropListener implements Listener {
         }
         if (System.currentTimeMillis() < expiry) {
             event.setCancelled(true);
-        } else {
-            item.remove();
         }
+        // Expired: let the vanilla despawn proceed normally.
     }
 
     public void startCleanupTask() {
@@ -83,18 +82,19 @@ public final class DeathDropListener implements Listener {
         long intervalTicks = 20L * 60L * 5L;
         cleanupTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
             long now = System.currentTimeMillis();
-            for (Item item : plugin.getServer().getWorlds().stream()
-                .flatMap(world -> world.getEntitiesByClass(Item.class).stream())
-                .toList()) {
-                Long expiry = item.getPersistentDataContainer().get(keys.deathDropExpiry(), PersistentDataType.LONG);
-                if (expiry == null) {
-                    expiry = item.getItemStack().getPersistentDataContainer().get(
-                        keys.deathDropExpiry(),
-                        PersistentDataType.LONG
-                    );
-                }
-                if (expiry != null && now >= expiry) {
-                    item.remove();
+            for (var world : plugin.getServer().getWorlds()) {
+                for (Item item : world.getEntitiesByClass(Item.class)) {
+                    // Entity PDC first (cheap, set on spawn); stack PDC as fallback.
+                    Long expiry = item.getPersistentDataContainer().get(keys.deathDropExpiry(), PersistentDataType.LONG);
+                    if (expiry == null) {
+                        expiry = item.getItemStack().getPersistentDataContainer().get(
+                            keys.deathDropExpiry(),
+                            PersistentDataType.LONG
+                        );
+                    }
+                    if (expiry != null && now >= expiry) {
+                        item.remove();
+                    }
                 }
             }
         }, intervalTicks, intervalTicks);

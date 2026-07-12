@@ -2,8 +2,10 @@ package io.blume.enchants;
 
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.jetbrains.annotations.NotNull;
@@ -41,11 +43,25 @@ public final class ManualBreak {
             return false;
         }
 
+        // Fire a real BlockBreakEvent so protection plugins (WorldGuard,
+        // GriefPrevention, claims) can veto each block. Our own listeners skip
+        // it via the EnchantContext.isProcessing() guard.
+        BlockBreakEvent breakEvent = new BlockBreakEvent(block, player);
+        breakEvent.setExpToDrop(0);
+        breakEvent.setDropItems(false);
+        if (!breakEvent.callEvent()) {
+            return false;
+        }
+
+        Material brokenType = block.getType();
         Collection<ItemStack> drops = block.getDrops(tool, player);
         List<ItemStack> dropList = smeltDrops
             ? SmeltRecipes.smeltDrops(List.copyOf(drops))
             : List.copyOf(drops);
-        int xp = OreXp.forBlock(block.getType());
+        int xp = OreXp.forBlock(brokenType);
+        if (smeltDrops) {
+            xp += OreXp.smeltBonus(brokenType);
+        }
         block.setType(Material.AIR, false);
 
         var location = block.getLocation().add(0.5, 0.5, 0.5);
@@ -64,7 +80,7 @@ public final class ManualBreak {
         return true;
     }
 
-    private static void damageTool(@NotNull Player player, @NotNull ItemStack tool) {
+    public static void damageTool(@NotNull Player player, @NotNull ItemStack tool) {
         if (player.getGameMode() == GameMode.CREATIVE
             || tool.getType().getMaxDurability() <= 0
             || EnchantChecks.has(tool, BlumeEnchantments.unbreakable())
@@ -75,6 +91,7 @@ public final class ManualBreak {
         int newDamage = damageable.getDamage() + 1;
         if (newDamage >= tool.getType().getMaxDurability()) {
             player.getInventory().setItemInMainHand(null);
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1.0f, 1.0f);
             return;
         }
         damageable.setDamage(newDamage);

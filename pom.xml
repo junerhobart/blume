@@ -24,9 +24,9 @@
         <revision>0.0.0-dev</revision>
         <java.version>25</java.version>
         <minecraft.version>26.2</minecraft.version>
-        <!-- ponytail: 26.2 is alpha-only on Paper as of 2026-07; pin a specific
-             build for reproducible CI, bump once a stable coordinate lands. -->
-        <paper.api.version>26.2.build.56-alpha</paper.api.version>
+        <!-- ponytail: 26.2 has no stable Paper coordinate yet as of 2026-07; pin
+             the latest RC build for reproducible CI, bump once stable lands. -->
+        <paper.api.version>26.2-rc-2.build.9-alpha</paper.api.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -49,13 +49,13 @@
         <dependency>
             <groupId>net.luckperms</groupId>
             <artifactId>api</artifactId>
-            <version>5.4</version>
+            <version>5.5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.11.4</version>
+            <version>6.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -68,6 +68,7 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
+        <finalName>${project.artifactId}-${project.version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -103,9 +104,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.4.2</version>
-                <configuration>
-                    <finalName>${project.artifactId}-${project.version}</finalName>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

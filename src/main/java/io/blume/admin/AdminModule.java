@@ -12,6 +12,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.jetbrains.annotations.NotNull;
@@ -76,7 +77,14 @@ public final class AdminModule {
     }
 
     public void reload(@NotNull AdminConfig newConfig) {
-        disable();
+        try {
+            disable();
+        } catch (RuntimeException e) {
+            // Never let a failed teardown abort the reload; enable() below
+            // rebuilds from scratch either way.
+            plugin.getLogger().warning("AdminModule disable failed during reload: " + e);
+            listeners.clear();
+        }
         this.config = newConfig;
         graylistService.reload(newConfig);
         enable();
@@ -98,6 +106,13 @@ public final class AdminModule {
     }
 
     private final class JoinListener implements Listener {
+
+        // Bukkit discards the PermissionAttachment on quit; drop our stale
+        // reference so a rejoin gets a fresh attachment.
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onQuit(PlayerQuitEvent event) {
+            graylistService.removeAttachment(event.getPlayer());
+        }
 
         @EventHandler(priority = EventPriority.MONITOR)
         public void onJoin(PlayerJoinEvent event) {

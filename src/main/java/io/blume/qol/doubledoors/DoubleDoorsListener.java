@@ -5,6 +5,7 @@ package io.blume.qol.doubledoors;
 
 import io.blume.BlumePlugin;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -41,9 +42,15 @@ public final class DoubleDoorsListener implements Listener {
     public void onBlockRedstone(BlockRedstoneEvent event) {
         int now = event.getNewCurrent();
         int old = event.getOldCurrent();
-        if (now != old && (now == 0 || old == 0)) {
-            handleDoubleDoor(event.getBlock());
+        if (now == old || (now != 0 && old != 0)) {
+            return;
         }
+        // Cheap type gate: BlockRedstoneEvent fires for every redstone component
+        // server-wide; only doors are relevant here.
+        if (!(event.getBlock().getBlockData() instanceof Door)) {
+            return;
+        }
+        handleDoubleDoor(event.getBlock());
     }
 
     private void handleDoubleDoor(Block block) {

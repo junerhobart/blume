@@ -8,10 +8,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public final class WildCropGuardListener implements Listener {
 
@@ -49,6 +53,26 @@ public final class WildCropGuardListener implements Listener {
             return;
         }
         clearWildCrop(event.getBlock());
+    }
+
+    // Explosions bypass BlockBreakEvent/BlockDestroyEvent; without these the
+    // wild-crop PDC entries would be orphaned on the chunk forever.
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        clearWildCrops(event.blockList());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        clearWildCrops(event.blockList());
+    }
+
+    private void clearWildCrops(@NotNull List<Block> blocks) {
+        for (Block block : blocks) {
+            if (isWildCrop(block)) {
+                clearWildCrop(block);
+            }
+        }
     }
 
     private boolean isWildCrop(@NotNull Block block) {

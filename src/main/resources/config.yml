@@ -166,10 +166,12 @@ enchants:
     enabled: true
   veinminer:
     enabled: true
-    max-blocks: -1
+    # -1 = unlimited (not recommended; one break processes the whole vein synchronously)
+    max-blocks: 64
   timber:
     enabled: true
-    max-blocks: -1
+    # -1 = unlimited (not recommended)
+    max-blocks: 256
     replant-saplings: true
   sickle:
     enabled: true

@@ -46,9 +46,10 @@ public final class CropHarvest {
         return ageable.getAge() >= ageable.getMaximumAge();
     }
 
-    public static void harvestAndReplant(@NotNull Player player, @NotNull Block block, @NotNull ItemStack tool) {
+    /** @return true if the crop was harvested (drops spawned). */
+    public static boolean harvestAndReplant(@NotNull Player player, @NotNull Block block, @NotNull ItemStack tool) {
         if (!isMatureCrop(block)) {
-            return;
+            return false;
         }
 
         List<ItemStack> drops = new ArrayList<>(block.getDrops(tool));
@@ -59,31 +60,34 @@ public final class CropHarvest {
         ReplantResult replant = determineReplant(block);
         if (replant == null) {
             dropAll(player, block, drops);
-            breakBlock(player, block, tool);
-            return;
+            breakBlock(block);
+            return true;
         }
 
         if (replant.consumeFromDrops() && !consumeOne(drops, replant.material())) {
             if (canReplantInPlace(block, drops, replant.material())) {
                 dropAll(player, block, drops);
                 resetAge(block);
-                return;
+                return true;
             }
             dropAll(player, block, drops);
-            breakBlock(player, block, tool);
-            return;
+            breakBlock(block);
+            return true;
         }
 
         dropAll(player, block, drops);
         resetAge(block);
+        return true;
     }
 
-    private static void breakBlock(@NotNull Player player, @NotNull Block block, @NotNull ItemStack tool) {
-        if (player.getGameMode() == GameMode.CREATIVE) {
-            block.setType(Material.AIR, false);
-            return;
+    // Drops are always spawned by dropAll() before this is called; using
+    // breakNaturally here would spawn a second set of drops (item duplication).
+    // setType fires no break event, so chunk metadata must be cleared here.
+    private static void breakBlock(@NotNull Block block) {
+        if (originHelper != null) {
+            originHelper.clearBlockMetadata(block);
         }
-        block.breakNaturally(tool, true);
+        block.setType(Material.AIR, false);
     }
 
     private static @Nullable ReplantResult determineReplant(@NotNull Block block) {

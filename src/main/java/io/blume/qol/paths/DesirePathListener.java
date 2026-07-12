@@ -16,7 +16,9 @@ public final class DesirePathListener implements Listener {
         this.service = service;
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    // NORMAL, not MONITOR: this handler mutates the world (block trample/erosion),
+    // which is forbidden for MONITOR-level listeners.
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
         if (event.getTo() == null) {
             return;

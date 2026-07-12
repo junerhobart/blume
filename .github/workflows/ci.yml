@@ -52,7 +52,7 @@ jobs:
         run: echo "revision=$(git describe --tags --always | sed 's/^v//')" >> "$GITHUB_OUTPUT"
 
       - name: Build plugin
-        run: mvn -B -Drevision=${{ steps.revision.outputs.revision }} package -DskipTests -Dminecraft.version=${{ matrix.minecraft_version }}
+        run: mvn -B -Drevision=${{ steps.revision.outputs.revision }} package -Dminecraft.version=${{ matrix.minecraft_version }}
 
       - name: Artifact contract
         run: |

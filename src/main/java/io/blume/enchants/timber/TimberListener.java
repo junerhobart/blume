@@ -94,7 +94,12 @@ public final class TimberListener implements Listener {
                 if (block.getType().isAir()) {
                     continue;
                 }
-                ManualBreak.breakAsPlayer(player, block, tool, false);
+                // Re-fetch each iteration: the axe may break mid-fell.
+                ItemStack held = player.getInventory().getItemInMainHand();
+                if (held.getType().isAir() || !ManualBreak.canBreakOneMore(player, held)) {
+                    break;
+                }
+                ManualBreak.breakAsPlayer(player, block, held, false);
             }
             if (config.isTimberReplantSaplings() && sapling != null) {
                 for (Location site : sites) {

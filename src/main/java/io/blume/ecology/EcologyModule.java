@@ -49,8 +49,10 @@ public final class EcologyModule {
             return;
         }
 
-        this.pastureScoreService = new PastureScoreService(plugin, config);
-        register(new WelfareYieldListener(pastureScoreService, config, keys));
+        if (config.isHusbandryEnabled()) {
+            this.pastureScoreService = new PastureScoreService(plugin, config);
+            register(new WelfareYieldListener(pastureScoreService, config, keys));
+        }
 
         PoisonPotatoHandler poisonHandler = new PoisonPotatoHandler(originHelper, config);
         CropHarvest.inject(originHelper, poisonHandler);
@@ -104,6 +106,8 @@ public final class EcologyModule {
             pastureScoreService.shutdown();
             pastureScoreService = null;
         }
+        // Drop the static references QOL harvest holds, or they go stale on reload.
+        CropHarvest.inject(null, null);
     }
 
     public void reload(@NotNull EcologyConfig newConfig) {

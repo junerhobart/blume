@@ -40,7 +40,8 @@ public final class HarvestListener implements Listener {
         if (requireEmptyHand && hand.getType() != Material.AIR) {
             return;
         }
-        if (!requireEmptyHand && EnchantChecks.levelKey(hand, BlumeEnchantments.SICKLE) > 0) {
+        // SickleListener owns sickle harvesting (radius harvest); skip to avoid double-processing.
+        if (EnchantChecks.levelKey(hand, BlumeEnchantments.SICKLE) > 0) {
             return;
         }
 

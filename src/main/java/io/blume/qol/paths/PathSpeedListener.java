@@ -40,7 +40,7 @@ public final class PathSpeedListener implements Listener {
         }
 
         Player player = event.getPlayer();
-        if (player.isFlying() || player.isGliding()) {
+        if (player.isFlying() || player.isGliding() || player.isSwimming()) {
             clearPathSpeed(player);
             return;
         }

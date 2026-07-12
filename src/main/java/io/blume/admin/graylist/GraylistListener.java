@@ -21,7 +21,7 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,30 +68,34 @@ public final class GraylistListener implements Listener {
             return;
         }
 
-        if (event.getHand() != EquipmentSlot.HAND) {
-            return;
-        }
-
         Action action = event.getAction();
-        if (action == Action.LEFT_CLICK_BLOCK || action == Action.LEFT_CLICK_AIR) {
+
+        // Farmland trampling, pressure plates, tripwires.
+        if (action == Action.PHYSICAL) {
             event.setCancelled(true);
             return;
         }
 
-        if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) {
+        if (action == Action.LEFT_CLICK_BLOCK) {
+            event.setCancelled(true);
+            return;
+        }
+        if (action == Action.LEFT_CLICK_AIR) {
+            // Arm swing in air is harmless.
             return;
         }
 
-        if (isRestrictedItem(player.getInventory().getItemInMainHand().getType())) {
+        // Right clicks: check the item actually used (covers off-hand too).
+        ItemStack used = event.getItem();
+        if (used != null && isRestrictedItem(used.getType())) {
             event.setCancelled(true);
             return;
         }
 
         Block block = event.getClickedBlock();
         if (block == null) {
-            if (action == Action.RIGHT_CLICK_AIR) {
-                event.setCancelled(true);
-            }
+            // Right-click air with a non-restricted item (eating, drinking,
+            // drawing a bow) is harmless to the world.
             return;
         }
 
@@ -159,7 +163,12 @@ public final class GraylistListener implements Listener {
         return material == Material.FLINT_AND_STEEL
             || material == Material.FIRE_CHARGE
             || material == Material.END_CRYSTAL
+            || material == Material.ENDER_PEARL
+            || material == Material.CHORUS_FRUIT
+            || material == Material.SPLASH_POTION
+            || material == Material.LINGERING_POTION
             || material.name().endsWith("_BUCKET")
+            || material.name().endsWith("_SPAWN_EGG")
             || Tag.BEDS.isTagged(material)
             || Tag.ITEMS_BOATS.isTagged(material);
     }

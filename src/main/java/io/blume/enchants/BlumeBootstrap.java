@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 public final class BlumeBootstrap implements PluginBootstrap {
@@ -166,8 +167,8 @@ public final class BlumeBootstrap implements PluginBootstrap {
         return Component.text(displayName).decoration(TextDecoration.ITALIC, false);
     }
 
-    private static @NotNull TagKey<Enchantment>[] tradeCommonTags() {
-        return new TagKey[] {
+    private static @NotNull List<TagKey<Enchantment>> tradeCommonTags() {
+        return List.of(
             EnchantmentTagKeys.TRADES_DESERT_COMMON,
             EnchantmentTagKeys.TRADES_JUNGLE_COMMON,
             EnchantmentTagKeys.TRADES_PLAINS_COMMON,
@@ -175,6 +176,6 @@ public final class BlumeBootstrap implements PluginBootstrap {
             EnchantmentTagKeys.TRADES_SNOW_COMMON,
             EnchantmentTagKeys.TRADES_SWAMP_COMMON,
             EnchantmentTagKeys.TRADES_TAIGA_COMMON
-        };
+        );
     }
 }

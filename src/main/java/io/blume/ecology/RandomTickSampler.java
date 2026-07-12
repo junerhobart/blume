@@ -13,6 +13,9 @@ import java.util.function.Consumer;
 public final class RandomTickSampler {
 
     private static final int MAX_CHUNKS_PER_TICK = 8;
+    // ponytail: cap samples per chunk so an admin setting randomTickSpeed to
+    // e.g. 1000 doesn't turn this into thousands of block lookups per tick.
+    private static final int MAX_SPEED = 64;
 
     private final Map<World, Integer> chunkCursor = new WeakHashMap<>();
 
@@ -25,7 +28,7 @@ public final class RandomTickSampler {
             return;
         }
 
-        int speed = RandomTickPace.speed(world);
+        int speed = Math.min(RandomTickPace.speed(world), MAX_SPEED);
         ThreadLocalRandom random = ThreadLocalRandom.current();
         int cursor = chunkCursor.getOrDefault(world, 0) % chunks.length;
         int toProcess = Math.min(MAX_CHUNKS_PER_TICK, chunks.length);

@@ -115,7 +115,12 @@ public final class CreeperRebuildService {
                 task = null;
             }
             for (BlockState state : states) {
-                rebuildBlock(state);
+                try {
+                    rebuildBlock(state);
+                } catch (RuntimeException e) {
+                    plugin.getLogger().warning("Creeper rebuild failed to restore block at "
+                        + state.getLocation() + ": " + e);
+                }
             }
             states.clear();
             finish();
@@ -128,7 +133,15 @@ public final class CreeperRebuildService {
                 return;
             }
 
-            rebuildBlock(states.removeLast());
+            try {
+                rebuildBlock(states.removeLast());
+            } catch (RuntimeException e) {
+                // If one block fails to restore, restore the rest immediately rather
+                // than leaking this rebuilder (task would never be rescheduled).
+                plugin.getLogger().warning("Creeper rebuild failed for a block, restoring remaining: " + e);
+                finishNow();
+                return;
+            }
 
             long delayMs = Math.max(
                 config.creeperRebuildMinDelayMs(),

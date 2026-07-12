@@ -56,11 +56,16 @@ public final class BeePollinationListener extends BukkitRunnable {
             if (!RandomTickPace.isActive(world)) {
                 continue;
             }
+            // Roll first: samples is 0 on almost every tick, and the entity
+            // scan is by far the most expensive part of this task.
+            int samples = RandomTickPace.rollSamplesPerTick(BEES_PER_SECOND_AT_VANILLA, world, random);
+            if (samples <= 0) {
+                continue;
+            }
             List<Bee> nectarBees = collectNectarBees(world);
             if (nectarBees.isEmpty()) {
                 continue;
             }
-            int samples = RandomTickPace.rollSamplesPerTick(BEES_PER_SECOND_AT_VANILLA, world, random);
             for (int i = 0; i < samples; i++) {
                 Bee bee = nectarBees.get(random.nextInt(nectarBees.size()));
                 pollinateCrop(bee);

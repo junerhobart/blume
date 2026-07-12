@@ -21,11 +21,6 @@ public final class Logs {
             || name.endsWith("_HYPHAE");
     }
 
-    /** @deprecated use {@link #isTimber} */
-    public static boolean isLog(@NotNull Material material) {
-        return isTimber(material);
-    }
-
     public static boolean sameFamily(@NotNull Material a, @NotNull Material b) {
         Material saplingA = saplingFor(a);
         Material saplingB = saplingFor(b);

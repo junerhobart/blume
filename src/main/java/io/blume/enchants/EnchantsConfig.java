@@ -26,9 +26,9 @@ public final class EnchantsConfig {
         enabled = sectionBool(enchants, "enabled", true);
         autoSmeltEnabled = sectionBool(enchants, "auto-smelt.enabled", true);
         veinminerEnabled = sectionBool(enchants, "veinminer.enabled", true);
-        veinminerMaxBlocks = sectionInt(enchants, "veinminer.max-blocks", -1);
+        veinminerMaxBlocks = sectionInt(enchants, "veinminer.max-blocks", 64);
         timberEnabled = sectionBool(enchants, "timber.enabled", true);
-        timberMaxBlocks = sectionInt(enchants, "timber.max-blocks", -1);
+        timberMaxBlocks = sectionInt(enchants, "timber.max-blocks", 256);
         timberReplantSaplings = sectionBool(enchants, "timber.replant-saplings", true);
         sickleEnabled = sectionBool(enchants, "sickle.enabled", true);
         sickleRadiusByLevel = parseRadiusByLevel(enchants);
