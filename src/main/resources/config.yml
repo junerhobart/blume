@@ -21,7 +21,7 @@ admin:
       text: "<yellow>You are graylisted.</yellow> A verified member must vouch for you before you can interact with the world. They can run <white>/vouch {username}</white>."
   command-broadcast:
     enabled: true
-    format: "<gray>[Cmd]</gray> <white>{player}</white>: <yellow>{command}</yellow>"
+    format: "<white>{player}</white>: <yellow>{command}</yellow>"
     commands:
       - gamemode
       - gm
@@ -70,35 +70,10 @@ admin:
       - v
       - socialspy
       - tphere
-      - tpahere
-      - tpa
-      - tpaccept
-      - tpdeny
-      - tpacancel
-      - back
-      - kit
-      - repair
-      - clearinventory
-      - ci
-      - hat
-      - more
-      - unlimited
-      - unl
-      - jump
-      - top
-      - workbench
-      - wb
-      - craft
-      - enderchest
-      - ec
-      - burn
-      - extinguish
-      - extingu
       - gms
       - gmc
       - gma
       - gmsp
-      - near
       - spectate
       - spec
       - worldedit
@@ -112,7 +87,6 @@ admin:
       - stack
       - undo
       - redo
-      - cmi
   luckperms:
     # luckperms hook — adds vouched players to a group. needs LuckPerms installed.
     # setup: /lp creategroup verified, set verified-group below, then enabled: true

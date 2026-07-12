@@ -12,7 +12,7 @@ import java.util.Set;
 public final class AdminConfig {
 
     private static final String DEFAULT_COMMAND_FORMAT =
-        "<gray>[Cmd]</gray> <white>{player}</white>: <yellow>{command}</yellow>";
+        "<white>{player}</white>: <yellow>{command}</yellow>";
     private static final String DEFAULT_GRAYLIST_JOIN_MESSAGE =
         "<yellow>You are graylisted.</yellow> A verified member must vouch for you before you can "
             + "interact with the world. They can run <white>/vouch {username}</white>.";
@@ -158,35 +158,10 @@ public final class AdminConfig {
         commands.add("v");
         commands.add("socialspy");
         commands.add("tphere");
-        commands.add("tpahere");
-        commands.add("tpa");
-        commands.add("tpaccept");
-        commands.add("tpdeny");
-        commands.add("tpacancel");
-        commands.add("back");
-        commands.add("kit");
-        commands.add("repair");
-        commands.add("clearinventory");
-        commands.add("ci");
-        commands.add("hat");
-        commands.add("more");
-        commands.add("unlimited");
-        commands.add("unl");
-        commands.add("jump");
-        commands.add("top");
-        commands.add("workbench");
-        commands.add("wb");
-        commands.add("craft");
-        commands.add("enderchest");
-        commands.add("ec");
-        commands.add("burn");
-        commands.add("extinguish");
-        commands.add("extingu");
         commands.add("gms");
         commands.add("gmc");
         commands.add("gma");
         commands.add("gmsp");
-        commands.add("near");
         commands.add("spectate");
         commands.add("spec");
         commands.add("worldedit");
@@ -200,7 +175,6 @@ public final class AdminConfig {
         commands.add("stack");
         commands.add("undo");
         commands.add("redo");
-        commands.add("cmi");
         return commands;
     }
 
