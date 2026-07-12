@@ -376,10 +376,6 @@ public final class EcologyConfig {
         return ecology != null ? ecology.getInt(path, def) : def;
     }
 
-    private static long sectionLong(ConfigurationSection ecology, @NotNull String path, long def) {
-        return ecology != null ? ecology.getLong(path, def) : def;
-    }
-
     private static double sectionDouble(ConfigurationSection ecology, @NotNull String path, double def) {
         return ecology != null ? ecology.getDouble(path, def) : def;
     }

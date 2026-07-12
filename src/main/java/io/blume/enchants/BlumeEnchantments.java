@@ -6,7 +6,6 @@ import io.papermc.paper.registry.TypedKey;
 import io.papermc.paper.registry.keys.EnchantmentKeys;
 import net.kyori.adventure.key.Key;
 import org.bukkit.enchantments.Enchantment;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class BlumeEnchantments {

@@ -82,7 +82,7 @@ public final class TimberListener implements Listener {
 
         event.setCancelled(true);
         Block stump = tree.stream()
-            .min(Comparator.comparingInt(Block::getY))
+            .min(Comparator.comparingInt(block -> block.getY()))
             .orElse(origin);
         Material stumpType = stump.getType();
         Material sapling = Logs.saplingFor(stumpType);
