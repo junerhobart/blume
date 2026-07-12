@@ -22,7 +22,7 @@ function iconPath(icon) {
   const resourceKey = icon.split("{")[0].split("#")[0];
   const [namespace, key] = resourceKey.split(":", 2);
   if (namespace === "minecraft") return `assets/minecraft/textures/item/${key}.png`;
-  if (namespace === "blume") return `resourcepack/java/assets/blume/textures/item/${key}.png`;
+  if (namespace === "blume") return `https://raw.githubusercontent.com/junerhobart/blume/main/resourcepack/java/assets/blume/textures/item/${key}.png`;
   return "assets/minecraft/textures/item/barrier.png";
 }
 

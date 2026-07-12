@@ -12,11 +12,11 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "25"
@@ -54,7 +54,7 @@ jobs:
             cat changelog.txt >> changelog.txt.tmp && mv changelog.txt.tmp changelog.txt
           fi
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           name: "[${{ steps.release.outputs.minecraft_version }}] Blume v${{ steps.release.outputs.tag }}"
           body_path: changelog.txt

@@ -1,5 +1,3 @@
-# v1.0
-
 ## QOL
 
 [x] 'double doors' from vane
@@ -48,3 +46,9 @@
 [x] github actions
 [x] add latest versions support but continue to maintain the version my server is on
 [x] fix grid
+[x] Update Node.js version
+
+# Vegan - https://daenvil.github.io/MCDatapacks/vegancraft.html
+
+[ ] book crafting recipe
+[ ] bed crafting recipe
