@@ -21,7 +21,7 @@
 
     <properties>
         <!-- Overridden via -Drevision; fallback when git is unavailable -->
-        <revision>0.0.0-dev</revision>
+        <revision>0.5.0-beta.3</revision>
         <java.version>25</java.version>
         <minecraft.version>26.2</minecraft.version>
         <!-- ponytail: 26.2 has no stable Paper coordinate yet as of 2026-07; pin
