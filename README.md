@@ -14,23 +14,17 @@ Refer to our [website](https://junerhobart.github.io/blume/) for a more comprehe
 
 Gameplay demos of Blume features: auto smelt, creeper rebuild, desire paths, double doors, harvest replant, path speed, sickle, timber, and veinminer.
 
-<table>
-  <tr>
-    <td><img width="360" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/auto-smelt.gif" alt="Auto Smelt enchant smelting ore as it is mined"></td>
-    <td><img width="360" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/creeper-rebuild.gif" alt="Creeper explosion hole automatically refilled with blocks"></td>
-    <td><img width="360" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/desire-paths.gif" alt="Repeated walking forming a dirt and gravel desire path"></td>
-  </tr>
-  <tr>
-    <td><img width="360" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/double-doors.gif" alt="Right-clicking one door opening both doors together"></td>
-    <td><img width="360" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/harvest-replant.gif" alt="Right-click harvesting a crop and replanting the seed"></td>
-    <td><img width="360" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/path-speed.gif" alt="Player moving faster while walking on path blocks"></td>
-  </tr>
-  <tr>
-    <td><img width="360" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/sickle.gif" alt="Sickle enchant harvesting crops in a radius around the player"></td>
-    <td><img width="360" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/timber.gif" alt="Timber enchant felling a whole tree and replanting a sapling"></td>
-    <td><img width="360" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/veinminer.gif" alt="Veinminer enchant mining all connected ore in one vein"></td>
-  </tr>
-</table>
+<img width="300" height="169" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/auto-smelt.gif" alt="Auto Smelt enchant smelting ore as it is mined">
+<img width="300" height="169" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/creeper-rebuild.gif" alt="Creeper explosion hole automatically refilled with blocks">
+<img width="300" height="169" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/desire-paths.gif" alt="Repeated walking forming a dirt and gravel desire path">
+
+<img width="300" height="169" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/double-doors.gif" alt="Right-clicking one door opening both doors together">
+<img width="300" height="169" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/harvest-replant.gif" alt="Right-click harvesting a crop and replanting the seed">
+<img width="300" height="169" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/path-speed.gif" alt="Player moving faster while walking on path blocks">
+
+<img width="300" height="169" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/sickle.gif" alt="Sickle enchant harvesting crops in a radius around the player">
+<img width="300" height="169" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/timber.gif" alt="Timber enchant felling a whole tree and replanting a sapling">
+<img width="300" height="169" src="https://github.com/junerhobart/blume/raw/main/docs/assets/gifs/veinminer.gif" alt="Veinminer enchant mining all connected ore in one vein">
 
 
 ## Credit
